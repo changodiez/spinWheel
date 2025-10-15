@@ -167,9 +167,6 @@ const SpinWheelAlgoland = () => {
           <span className="title-line accent">FORTUNE!</span>
         </h1>
         <div className="title-underline"></div>
-        {isDemoMode && (
-          <p className="demo-subtitle">Versión Demo - 11 premios predefinidos</p>
-        )}
       </div>
 
       {/* Contenedor de la ruleta */}
