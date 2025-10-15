@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin Wheel - Demo</title>
+    <title>Spin Wheel Algoland</title>
     <style>
         body {
             background: linear-gradient(135deg, #1e3a8a, #581c87);
@@ -18,7 +18,7 @@
             justify-content: center;
         }
         
-        .demo-container {
+        .container {
             max-width: 600px;
             background: rgba(255, 255, 255, 0.1);
             padding: 3rem;
@@ -31,12 +31,12 @@
             margin-bottom: 1rem;
         }
         
-        .warning {
-            background: rgba(239, 68, 68, 0.2);
+        .status {
+            background: rgba(16, 185, 129, 0.2);
             padding: 1rem;
             border-radius: 10px;
             margin: 2rem 0;
-            border: 1px solid #ef4444;
+            border: 1px solid #10b981;
         }
         
         .links {
@@ -44,6 +44,7 @@
             gap: 1rem;
             justify-content: center;
             margin-top: 2rem;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -63,31 +64,33 @@
         .btn.demo {
             background: #10b981;
         }
+        
+        .btn.github {
+            background: #3b82f6;
+        }
     </style>
 </head>
 <body>
-    <div class="demo-container">
+    <div class="container">
         <h1>🎡 Spin Wheel Algoland</h1>
-        <p>Esta es una demostración estática de la ruleta.</p>
+        <p>Ruleta interactiva para eventos</p>
         
-        <div class="warning">
-            <h3>⚠️ Versión Limitada</h3>
-            <p>La versión completa con panel de control en tiempo real requiere un servidor local con Node.js.</p>
+        <div class="status">
+            <h3>✅ Sistema Funcional</h3>
+            <p>El proyecto está activo y funcionando correctamente.</p>
         </div>
         
-        <div class="features">
-            <h3>✨ Características incluidas:</h3>
+        <div class="info">
+            <h3>📦 Versiones Disponibles</h3>
             <ul style="text-align: left; display: inline-block;">
-                <li>Ruleta interactiva con física realista</li>
-                <li>Efectos de sonido y animaciones</li>
-                <li>Diseño responsive para TV vertical</li>
-                <li>11 premios predefinidos</li>
+                <li><strong>GitHub Pages</strong>: Demo estática</li>
+                <li><strong>Local</strong>: Versión completa con panel de control</li>
             </ul>
         </div>
         
         <div class="links">
-            <a href="demo.html" class="btn demo">🎮 Ver Demo</a>
-            <a href="https://github.com/tu-usuario/spinWheel" class="btn">📦 Código Fuente</a>
+            <a href="https://changodiez.github.io/spinWheel/demo.html" class="btn demo">🎮 Ver Demo</a>
+            <a href="https://github.com/changodiez/spinWheel" class="btn github">📦 Código Fuente</a>
         </div>
     </div>
 </body>
