@@ -12,6 +12,7 @@ export const useWheelAnimation = (prizes) => {
   const requestRef = useRef();
   const lastTimeRef = useRef();
   const lastTickAngleRef = useRef(0);
+  const lastSliceRef = useRef(0);
   
   // Asegurarnos de que el hook de sonido se inicialice correctamente
   const { playTick, playWin, initializeAudio } = useSoundEffects();
@@ -60,11 +61,17 @@ export const useWheelAnimation = (prizes) => {
     const newAngle = angle - velocity * deltaTime;
     const newVelocity = velocity * (1 - deltaTime * CONFIG.PHYSICS.FRICTION);
 
-    // Reproducir sonido de tick al cruzar premios - MÁS FRECUENTE
-    const angleDiff = Math.abs(newAngle - lastTickAngleRef.current);
-    if (angleDiff > CONFIG.PHYSICS.TICK_INTERVAL) {
-      playTick();
-      lastTickAngleRef.current = newAngle;
+    // ✅ DETECCIÓN MEJORADA DE CRUCE DE PREMIOS
+    if (prizes.length > 0) {
+      const sliceAngle = (Math.PI * 2) / prizes.length;
+      const normalizedAngle = ((newAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const currentSlice = Math.floor(normalizedAngle / sliceAngle);
+      
+      // Solo reproducir sonido cuando realmente cambia de premio
+      if (currentSlice !== lastSliceRef.current) {
+        playTick(Math.abs(velocity)); // Pasar velocidad para sonido dinámico
+        lastSliceRef.current = currentSlice;
+      }
     }
 
     setAngle(newAngle);
@@ -112,6 +119,9 @@ export const useWheelAnimation = (prizes) => {
     initializeAudio();
     
     stopAnimation();
+    
+    // ✅ RESETEAR LAS REFERENCIAS AL COMENZAR NUEVO GIRO
+    lastSliceRef.current = 0;
     lastTickAngleRef.current = angle;
     
     setWinner(null);

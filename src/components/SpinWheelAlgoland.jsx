@@ -221,21 +221,8 @@ const SpinWheelAlgoland = () => {
       {/* Efectos de borde */}
       <div className="border-effect top"></div>
       <div className="border-effect bottom"></div>
-      
-      {/* Efectos de partículas */}
-      <div className="particles">
-        {[...Array(15)].map((_, i) => (
-          <div 
-            key={i}
-            className="particle"
-            style={{
-              '--delay': `${i * 0.5}s`,
-              '--duration': `${3 + Math.random() * 2}s`,
-              '--x': `${Math.random() * 100}%`
-            }}
-          />
-        ))}
-      </div>
+
+
     </div>
   );
 };

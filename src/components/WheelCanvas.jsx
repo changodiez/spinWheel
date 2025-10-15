@@ -86,8 +86,8 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       
       // Estilos especiales para QR codes
       const isQR = prize.startsWith('QR');
-      const fontSize = isQR ? 'bold 22px' : 'bold 22px';
-      const winnerFontSize = isQR ? 'bold 23px' : 'bold 23px';
+      const fontSize = 'bold 1.1rem';
+      const winnerFontSize = 'bold 1.5rem';
       
       ctx.fillStyle = textColor;
       ctx.font = isWinner ? `${winnerFontSize} 'Arial Black', sans-serif` : `${fontSize} 'Arial Black', sans-serif`;

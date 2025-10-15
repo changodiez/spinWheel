@@ -18,10 +18,11 @@ export const CONFIG = {
       }
     },
     POINTER: {
-      BEND_INTENSITY: 500,
-      DAMPING: 0.85,
-      ANIMATION_INTERVAL: 2
-    },
+        BEND_INTENSITY: 25, // Intensidad máxima del bend
+        ANIMATION_INTERVAL: 16, // ~60fps
+        DAMPING: 0.7, // Amortiguación del retorno
+        MIN_VELOCITY: 0.1 // Velocidad mínima para activar el efecto
+      },
     SOUND: {
       TICK_FREQUENCY: 900,
       WIN_NOTES: [523.25, 659.25, 783.99, 1046.50],
