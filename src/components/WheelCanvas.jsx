@@ -114,6 +114,68 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.restore();
     });
 
+    // ✅ DIBUJAR CÍRCULOS EN LOS BORDES ENTRE PREMIOS
+    prizes.forEach((_, index) => {
+      const startAngle = index * sliceAngle;
+      
+      // Posición del círculo en el borde (al 85% del radio)
+      const circleRadius = size * 0.015; // Radio del círculo (1.5% del tamaño)
+      const circleDistance = radius * 1.01; // Distancia desde el centro
+      
+      const circleX = Math.cos(startAngle) * circleDistance;
+      const circleY = Math.sin(startAngle) * circleDistance;
+      
+      // Círculo exterior con efecto 3D
+      ctx.beginPath();
+      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+      
+      // Gradiente para efecto metálico
+      const gradient = ctx.createRadialGradient(
+        circleX - circleRadius * 0.3, 
+        circleY - circleRadius * 0.3, 
+        0,
+        circleX, 
+        circleY, 
+        circleRadius
+      );
+      
+      gradient.addColorStop(0, '#fbbf24'); // Amarillo brillante
+      gradient.addColorStop(0.5, '#d97706'); // Amarillo oscuro
+      gradient.addColorStop(1, '#92400e'); // Marrón oscuro
+      
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // Borde del círculo
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Punto de highlight para efecto 3D
+      ctx.beginPath();
+      ctx.arc(
+        circleX - circleRadius * 0.2, 
+        circleY - circleRadius * 0.2, 
+        circleRadius * 0.4, 
+        0, 
+        Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
+      
+      // Sombra para profundidad
+      ctx.beginPath();
+      ctx.arc(
+        circleX + circleRadius * 0.2, 
+        circleY + circleRadius * 0.2, 
+        circleRadius * 0.3, 
+        0, 
+        Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fill();
+    });
+
     // Centro de la rueda
     ctx.beginPath();
     ctx.arc(0, 0, 25, 0, Math.PI * 2);
