@@ -8,7 +8,11 @@ const loading = document.getElementById('loading')
 if (loading) {
   loading.style.opacity = '0'
   loading.style.transition = 'opacity 0.5s ease'
-  setTimeout(() => loading.remove(), 500)
+  setTimeout(() => {
+    if (loading.parentNode) {
+      loading.parentNode.removeChild(loading)
+    }
+  }, 500)
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

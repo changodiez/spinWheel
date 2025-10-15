@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Ruleta de la fortuna interactiva" />
-    <title>Wheel of Fortune</title>
+    <meta name="description" content="Ruleta de la fortuna interactiva - Spin Wheel Algoland" />
+    <title>Spin Wheel - Ruleta de Premios</title>
+    
     <style>
-      /* Loading inicial */
+      /* Loading mejorado */
       #loading {
         position: fixed;
         top: 0;
@@ -21,15 +22,23 @@
         z-index: 9999;
         color: white;
         font-family: Arial, sans-serif;
+        transition: opacity 0.5s ease;
       }
       
       .spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid rgba(255, 255, 255, 0.3);
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         border-top-color: #fbbf24;
         animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      
+      .loading-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
       }
       
       @keyframes spin {
@@ -41,10 +50,31 @@
     <div id="loading">
       <div style="text-align: center;">
         <div class="spinner"></div>
-        <p style="margin-top: 1rem;">Cargando Ruleta...</p>
+        <div class="loading-text">Cargando Ruleta...</div>
       </div>
     </div>
+    
     <div id="root"></div>
+    
+    <script>
+      // Script para remover loading
+      function removeLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => {
+            if (loading.parentNode) {
+              loading.parentNode.removeChild(loading);
+            }
+          }, 500);
+        }
+      }
+      
+      window.addEventListener('load', removeLoading);
+      setTimeout(removeLoading, 5000);
+    </script>
+    
+    <!-- 👇 RUTA RELATIVA CORRECTA -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
