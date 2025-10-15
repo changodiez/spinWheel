@@ -28,7 +28,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
 
     // Dibujar fondo de la rueda
     ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + 10, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, radius + 2, 0, Math.PI * 2);
     ctx.fillStyle = CONFIG.WHEEL.COLORS.BASE;
     ctx.fill();
 
@@ -78,14 +78,13 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       // Texto del premio
       ctx.save();
       ctx.rotate(startAngle + sliceAngle / 2);
-      ctx.translate(radius * 0.7, 0);
-      ctx.rotate(Math.PI / 2);
+      ctx.translate(radius * 0.65, 0);
+      ctx.rotate(Math.PI );
       
       // Color del texto - SIEMPRE BLANCO para mejor contraste
       const textColor = "#FFFFFF";
       
-      // Estilos especiales para QR codes
-      const isQR = prize.startsWith('QR');
+ 
       const fontSize = 'bold 1.1rem';
       const winnerFontSize = 'bold 1.5rem';
       
@@ -94,7 +93,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.shadowColor = "#000000";
-      ctx.shadowBlur = 8; // Aumentar sombra para mejor legibilidad
+      ctx.shadowBlur = 15; // Aumentar sombra para mejor legibilidad
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
       
@@ -113,82 +112,96 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.fillText(prize, 0, 0);
       ctx.restore();
     });
-
-    // ✅ DIBUJAR CÍRCULOS EN LOS BORDES ENTRE PREMIOS
-    prizes.forEach((_, index) => {
-      const startAngle = index * sliceAngle;
-      
-      // Posición del círculo en el borde (al 85% del radio)
-      const circleRadius = size * 0.015; // Radio del círculo (1.5% del tamaño)
-      const circleDistance = radius * 1.01; // Distancia desde el centro
-      
-      const circleX = Math.cos(startAngle) * circleDistance;
-      const circleY = Math.sin(startAngle) * circleDistance;
-      
-      // Círculo exterior con efecto 3D
-      ctx.beginPath();
-      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
-      
-      // Gradiente para efecto metálico
-      const gradient = ctx.createRadialGradient(
-        circleX - circleRadius * 0.3, 
-        circleY - circleRadius * 0.3, 
-        0,
-        circleX, 
-        circleY, 
-        circleRadius
-      );
-      
-      gradient.addColorStop(0, '#fbbf24'); // Amarillo brillante
-      gradient.addColorStop(0.5, '#d97706'); // Amarillo oscuro
-      gradient.addColorStop(1, '#92400e'); // Marrón oscuro
-      
-      ctx.fillStyle = gradient;
-      ctx.fill();
-      
-      // Borde del círculo
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      // Punto de highlight para efecto 3D
-      ctx.beginPath();
-      ctx.arc(
-        circleX - circleRadius * 0.2, 
-        circleY - circleRadius * 0.2, 
-        circleRadius * 0.4, 
-        0, 
-        Math.PI * 2
-      );
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fill();
-      
-      // Sombra para profundidad
-      ctx.beginPath();
-      ctx.arc(
-        circleX + circleRadius * 0.2, 
-        circleY + circleRadius * 0.2, 
-        circleRadius * 0.3, 
-        0, 
-        Math.PI * 2
-      );
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.fill();
-    });
+/*
+    // ✅ DIBUJAR CÍRCULOS EN LOS BORDES ENTRE PREMIOS - TONO BLANCO HUESO
+prizes.forEach((_, index) => {
+  const startAngle = index * sliceAngle;
+  
+  // Posición del círculo en el borde (al 85% del radio)
+  const circleRadius = size * 0.013; // Radio del círculo (1.5% del tamaño)
+  const circleDistance = radius * 1.01; // Distancia desde el centro
+  
+  const circleX = Math.cos(startAngle) * circleDistance;
+  const circleY = Math.sin(startAngle) * circleDistance;
+  
+  // Círculo exterior con efecto metálico blanco hueso
+  ctx.beginPath();
+  ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+  
+  // Gradiente para efecto metálico blanco hueso
+  const gradient = ctx.createRadialGradient(
+    circleX - circleRadius * 0.3, 
+    circleY - circleRadius * 0.3, 
+    0,
+    circleX, 
+    circleY, 
+    circleRadius
+  );
+  
+  // Tonos blanco hueso/metálico
+  gradient.addColorStop(0, '#f8f6f0');    // Blanco hueso brillante
+  gradient.addColorStop(0.4, '#e8e6d9');  // Blanco hueso medio
+  gradient.addColorStop(0.7, '#d6d4c8');  // Blanco hueso oscuro
+  gradient.addColorStop(1, '#b8b5a8');    // Gris hueso
+  
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // Borde sutil del círculo
+  ctx.strokeStyle = '#8a887e';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  
+  // Punto de highlight para efecto 3D más suave
+  ctx.beginPath();
+  ctx.arc(
+    circleX - circleRadius * 0.15, 
+    circleY - circleRadius * 0.15, 
+    circleRadius * 0.35, 
+    0, 
+    Math.PI * 2
+  );
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.fill();
+  
+  // Sombra sutil para profundidad
+  ctx.beginPath();
+  ctx.arc(
+    circleX + circleRadius * 0.1, 
+    circleY + circleRadius * 0.1, 
+    circleRadius * 0.25, 
+    0, 
+    Math.PI * 2
+  );
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+  ctx.fill();
+  
+  // Efecto de brillo adicional en el centro
+  ctx.beginPath();
+  ctx.arc(
+    circleX - circleRadius * 0.1, 
+    circleY - circleRadius * 0.1, 
+    circleRadius * 0.2, 
+    0, 
+    Math.PI * 2
+  );
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fill();
+});*/
 
     // Centro de la rueda
     ctx.beginPath();
-    ctx.arc(0, 0, 25, 0, Math.PI * 2);
+    ctx.arc(0, 0, 30, 0, Math.PI * 2);
     ctx.fillStyle = CONFIG.WHEEL.COLORS.BASE;
     ctx.fill();
     
     ctx.beginPath();
-    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+    ctx.arc(0, 0, 35, 0, Math.PI * 2);
     ctx.fillStyle = CONFIG.WHEEL.COLORS.CENTER;
     ctx.fill();
     
     ctx.strokeStyle = CONFIG.WHEEL.COLORS.BORDER;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.restore();

@@ -11,10 +11,10 @@ export const CONFIG = {
       BORDER_WIDTH: 20,
       CENTER_RADIUS: 25,
       COLORS: {
-        BASE: "#8B4513",
-        CENTER: "#D4AF37",
+        BASE: "white",
+        CENTER: "black",
         WINNER_GLOW: "#FFD700",
-        BORDER: "#C0C0C0"
+        BORDER: "white"
       }
     },
     POINTER: {
@@ -33,19 +33,7 @@ export const CONFIG = {
     }
   };
   
-  export const PRIZES = [
-    "Tote Bag",
-    "Camiseta", 
-    "QR1",
-    "Gorra",
-    "Mug",
-    "QR2",
-    "Pin",
-    "Patch",
-    "QR3",
-    "Luggage Tag",
-    "Calcetín"
-  ];
+
   
   // Colores especiales para los QR codes
   export const PRIZE_COLORS = {
