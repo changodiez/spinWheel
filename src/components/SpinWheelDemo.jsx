@@ -170,9 +170,7 @@ const SpinWheelDemo = () => {
       </div>
 
       {/* Info para usuarios */}
-      <div className="github-info">
-        <p>💡 <strong>¿Versión completa?</strong> Clona el repositorio y ejecuta localmente para tener panel de control en tiempo real.</p>
-      </div>
+
     </div>
   );
 };
