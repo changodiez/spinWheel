@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, memo } from 'react';
-import { generateColor } from '../utils/wheelCalculations';
+import { generateColor, getTextColor } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
 
 const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
@@ -44,6 +44,9 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       const endAngle = startAngle + sliceAngle;
       const isWinner = index === winnerIndex;
 
+      // Color del segmento
+      const segmentColor = generateColor(index, prizes.length, prize);
+
       // Segmento principal
       ctx.beginPath();
       ctx.moveTo(0, 0);
@@ -55,7 +58,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
         ctx.shadowColor = CONFIG.WHEEL.COLORS.WINNER_GLOW;
         ctx.shadowBlur = 20;
       } else {
-        ctx.fillStyle = generateColor(index, prizes.length);
+        ctx.fillStyle = segmentColor;
         ctx.shadowBlur = 0;
       }
       
@@ -78,8 +81,16 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.translate(radius * 0.7, 0);
       ctx.rotate(Math.PI / 2);
       
-      ctx.fillStyle = isWinner ? "#000000" : "#FFFFFF";
-      ctx.font = isWinner ? "bold 16px 'Arial Black', sans-serif" : "bold 14px 'Arial Black', sans-serif";
+      // Color del texto basado en el fondo
+      const textColor = isWinner ? "#000000" : getTextColor(segmentColor);
+      
+      // Estilos especiales para QR codes
+      const isQR = prize.startsWith('QR');
+      const fontSize = isQR ? 'bold 16px' : 'bold 14px';
+      const winnerFontSize = isQR ? 'bold 18px' : 'bold 16px';
+      
+      ctx.fillStyle = textColor;
+      ctx.font = isWinner ? `${winnerFontSize} 'Arial Black', sans-serif` : `${fontSize} 'Arial Black', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.shadowColor = "#000000";
@@ -93,7 +104,9 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       
       // Ajustar tamaño de fuente si es necesario
       if (metrics.width > maxTextWidth) {
-        currentFont = isWinner ? "bold 12px 'Arial Black', sans-serif" : "bold 11px 'Arial Black', sans-serif";
+        const smallerFontSize = isQR ? "bold 14px" : "bold 12px";
+        const smallerWinnerFontSize = isQR ? "bold 16px" : "bold 14px";
+        currentFont = isWinner ? `${smallerWinnerFontSize} 'Arial Black', sans-serif` : `${smallerFontSize} 'Arial Black', sans-serif`;
         ctx.font = currentFont;
       }
       
