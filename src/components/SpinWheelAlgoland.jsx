@@ -120,8 +120,8 @@ const SpinWheelAlgoland = () => {
         />
       </div>
 
-      {/* Botón de girar - MÁS GRANDE para TV */}
-      <button
+           {/* Botón de girar */}
+           <button
         onClick={handleSpin}
         onTouchStart={handleTouchStart}
         disabled={spinning}
@@ -157,14 +157,14 @@ const SpinWheelAlgoland = () => {
       
       {/* Efectos de partículas */}
       <div className="particles">
-        {[...Array(15)].map((_, i) => ( // Menos partículas para mejor rendimiento
+        {[...Array(100)].map((_, i) => ( // Menos partículas para mejor rendimiento
           <div 
             key={i}
             className="particle"
             style={{
               '--delay': `${i * 0.5}s`,
               '--duration': `${3 + Math.random() * 2}s`,
-              '--x': `${Math.random() * 100}%`
+              '--x': `${Math.random() * 100000}%`
             }}
           />
         ))}

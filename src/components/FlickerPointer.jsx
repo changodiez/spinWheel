@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { CONFIG } from '../constants/config';
+import './FlickerPointer.css';
 
 const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   const [bend, setBend] = useState(0);
@@ -42,91 +43,54 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
     return () => clearInterval(interval);
   }, [bend]);
 
-  // Calcular posición exacta del puntero
+  // Calcular posición y tamaño proporcional
   const pointerStyle = {
     position: 'absolute',
-    top: '17%',
+    top: '6%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     zIndex: 20,
     pointerEvents: 'none'
   };
 
-  const pointerHeight = Math.max(wheelSize * 0.07, 15); // Altura proporcional
+  const pointerHeight = 50;
 
   return (
     <div style={pointerStyle}>
-      <div className="relative flex flex-col items-center">
-        {/* Base superior */}
-        <div 
-          className="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full 
-                     border-4 border-gray-600 shadow-2xl relative z-10
-                     flex items-center justify-center"
-          aria-hidden="true"
-        >
-          <div className="w-5 h-5 bg-yellow-400 rounded-full shadow-inner animate-pulse"></div>
+      <div className="pointer-container">
+        {/* Base decorativa */}
+        <div className="pointer-base">
+          <div className="base-glow"></div>
+          <div className="base-center"></div>
         </div>
         
-        {/* Palito flexible - MUCHO MÁS CORTO */}
+        {/* Brazo de la flecha - TODO JUNTO PARA QUE SE MUEVA */}
         <div 
-          className="relative"
+          className="pointer-arm-container"
           style={{ 
-            width: '6px',
-            height: `${pointerHeight}px`,
-            transformOrigin: 'top center',
             transform: `rotate(${bend}deg)`,
-            transition: 'transform 0.05s ease-out'
           }}
-          aria-hidden="true"
         >
-          <div
-            style={{ 
-              width: '100%',
-              height: '100%',
-              background: 'linear-gradient(180deg, #991B1B 0%, #DC2626 30%, #EF4444 50%, #DC2626 70%, #991B1B 100%)',
-              boxShadow: `
-                0 2px 15px rgba(220, 38, 38, 0.8),
-                inset 1px 0 2px rgba(255, 255, 255, 0.3),
-                inset -1px 0 2px rgba(0, 0, 0, 0.3)
-              `,
-              borderRadius: '3px 3px 6px 6px',
-              border: '1px solid #7F1D1D'
-            }}
-          />
-          
-          {/* Punta del palito - MÁS GRANDE Y VISIBLE */}
+          {/* Brazo */}
           <div 
-            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2
-                       w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-full 
-                       border-4 border-red-800 shadow-2xl"
-            style={{
-              boxShadow: `
-                0 4px 20px rgba(220, 38, 38, 0.9),
-                0 0 25px rgba(220, 38, 38, 0.6),
-                inset 2px 2px 4px rgba(255, 255, 255, 0.2)
-              `,
-              animation: 'glow 2s ease-in-out infinite alternate'
-            }}
-          />
+            className="pointer-arm"
+            style={{ height: `${pointerHeight}px` }}
+          >
+     
+          </div>
+          
+          {/* Cabeza de la flecha - CORREGIDA (apuntando hacia la rueda) */}
+          <div className="arrow-head">
+            <div className="arrow-main">
+              <div className="arrow-glow"></div>
+            </div>
+            <div className="arrow-tip"></div>
+            <div className="arrow-highlight"></div>
+          </div>
         </div>
-      </div>
 
-      <style jsx>{`
-        @keyframes glow {
-          from {
-            box-shadow: 
-              0 4px 20px rgba(220, 38, 38, 0.9),
-              0 0 25px rgba(220, 38, 38, 0.6),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.2);
-          }
-          to {
-            box-shadow: 
-              0 4px 25px rgba(220, 38, 38, 1),
-              0 0 35px rgba(220, 38, 38, 0.8),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.3);
-          }
-        }
-      `}</style>
+       
+      </div>
     </div>
   );
 });
