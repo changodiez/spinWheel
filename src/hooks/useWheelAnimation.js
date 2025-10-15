@@ -13,7 +13,26 @@ export const useWheelAnimation = (prizes) => {
   const lastTimeRef = useRef();
   const lastTickAngleRef = useRef(0);
   
-  const { playTick, playWin } = useSoundEffects();
+  // Asegurarnos de que el hook de sonido se inicialice correctamente
+  const { playTick, playWin, initializeAudio } = useSoundEffects();
+
+  // Inicializar audio cuando el componente se monta
+  useEffect(() => {
+    // Forzar la inicialización del audio en una interacción del usuario
+    const handleFirstInteraction = () => {
+      initializeAudio();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+  }, [initializeAudio]);
 
   const stopAnimation = useCallback(() => {
     if (requestRef.current) {
@@ -41,7 +60,7 @@ export const useWheelAnimation = (prizes) => {
     const newAngle = angle - velocity * deltaTime;
     const newVelocity = velocity * (1 - deltaTime * CONFIG.PHYSICS.FRICTION);
 
-    // Reproducir sonido de tick al cruzar premios
+    // Reproducir sonido de tick al cruzar premios - MÁS FRECUENTE
     const angleDiff = Math.abs(newAngle - lastTickAngleRef.current);
     if (angleDiff > CONFIG.PHYSICS.TICK_INTERVAL) {
       playTick();
@@ -62,7 +81,12 @@ export const useWheelAnimation = (prizes) => {
       };
       
       setWinner(winnerData);
-      playWin();
+      
+      // Pequeño delay antes del sonido de victoria
+      setTimeout(() => {
+        playWin();
+      }, 300);
+      
       stopAnimation();
       return;
     }
@@ -84,6 +108,9 @@ export const useWheelAnimation = (prizes) => {
   const startSpin = useCallback(() => {
     if (spinning) return;
     
+    // Asegurar que el audio esté inicializado antes de girar
+    initializeAudio();
+    
     stopAnimation();
     lastTickAngleRef.current = angle;
     
@@ -95,7 +122,7 @@ export const useWheelAnimation = (prizes) => {
     
     setVelocity(randomVelocity);
     setSpinning(true);
-  }, [spinning, angle, stopAnimation]);
+  }, [spinning, angle, stopAnimation, initializeAudio]);
 
   return { 
     angle, 

@@ -1,17 +1,43 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useWheelAnimation } from '../hooks/useWheelAnimation';
 import { PRIZES, CONFIG } from '../constants/config';
 import { getResponsiveSize } from '../utils/wheelCalculations';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
+import './SpinWheelAlgoland.css';
 
 const SpinWheelAlgoland = () => {
   const [wheelSize, setWheelSize] = useState(CONFIG.WHEEL.SIZE);
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const [audioReady, setAudioReady] = useState(false);
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(PRIZES);
+  const buttonRef = useRef(null);
+
+  // Efecto para inicializar audio en la primera interacción
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      setAudioReady(true);
+      // Remover listeners después de la primera interacción
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    if (!audioReady) {
+      window.addEventListener('click', handleFirstInteraction);
+      window.addEventListener('touchstart', handleFirstInteraction);
+      window.addEventListener('keydown', handleFirstInteraction);
+    }
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [audioReady]);
 
   // Efecto para anuncios de accesibilidad
   useEffect(() => {
@@ -43,8 +69,11 @@ const SpinWheelAlgoland = () => {
   }, []);
 
   const handleSpin = useCallback(() => {
+    if (!audioReady) {
+      setAudioReady(true);
+    }
     startSpin();
-  }, [startSpin]);
+  }, [audioReady, startSpin]);
 
   const handleCloseWinner = useCallback(() => {
     setShowWinner(false);
@@ -58,14 +87,14 @@ const SpinWheelAlgoland = () => {
 
   if (!PRIZES || PRIZES.length === 0) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900">
+      <div className="spin-wheel-container error">
         <div className="text-2xl text-white font-bold">No hay premios disponibles</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900 p-4">
+    <div className="spin-wheel-container">
       {/* Anuncios de accesibilidad */}
       <div 
         className="sr-only" 
@@ -75,57 +104,60 @@ const SpinWheelAlgoland = () => {
         {announcement}
       </div>
 
+      {/* Indicador de audio */}
+    
+
       {/* Encabezado */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 mb-2 tracking-wider 
-                      [text-shadow:_0_2px_10px_rgba(255_255_0_/_50%)]">
-          WHEEL OF
+      <div className="header">
+        <h1 className="title-main">
+          <span className="title-line">WHEEL OF</span>
+          <span className="title-line accent">FORTUNE!</span>
         </h1>
-        <h1 className="text-5xl md:text-7xl font-bold text-yellow-400 mb-4 tracking-wider
-                      [text-shadow:_0_2px_15px_rgba(255_255_0_/_60%)]">
-          FORTUNE!
-        </h1>
-        <div 
-          className="w-32 h-1 bg-yellow-400 mx-auto mb-6 
-                    [box-shadow:_0_0_10px_rgba(255_255_0_/_70%)]"
-          aria-hidden="true"
-        />
+        <div className="title-underline"></div>
       </div>
 
       {/* Contenedor de la ruleta */}
-      <div className="relative mb-12">
-        <WheelCanvas 
-          angle={angle} 
-          prizes={PRIZES} 
-          winnerIndex={winner?.index}
-          size={wheelSize}
-        />
-        
-        <FlickerPointer 
-          angle={angle} 
-          prizes={PRIZES} 
-          wheelSize={wheelSize}
-          velocity={velocity}
-        />
+      <div className="wheel-container">
+        <div className="wheel-wrapper" style={{ width: wheelSize, height: wheelSize }}>
+          <WheelCanvas 
+            angle={angle} 
+            prizes={PRIZES} 
+            winnerIndex={winner?.index}
+            size={wheelSize}
+          />
+          
+          <FlickerPointer 
+            angle={angle} 
+            prizes={PRIZES} 
+            wheelSize={wheelSize}
+            velocity={velocity}
+          />
+        </div>
       </div>
 
       {/* Botón de girar */}
       <button
+        ref={buttonRef}
         onClick={handleSpin}
         onTouchStart={handleTouchStart}
         disabled={spinning}
         aria-label={spinning ? "Girando la ruleta" : "Girar la ruleta"}
-        className={`px-8 md:px-12 py-4 md:py-6 rounded-full text-white text-xl md:text-2xl font-bold 
-                   transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-yellow-300
-                   ${
-          spinning 
-            ? 'bg-gray-600 cursor-not-allowed' 
-            : 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-        }
-                   [box-shadow:_0_0_30px_rgba(255_165_0_/_60%)]
-                   border-4 border-yellow-300`}
+        className={`spin-button ${spinning ? 'spinning' : ''}`}
       >
-        {spinning ? 'SPINNING... 🌀' : 'SPIN THE WHEEL!'}
+        <span className="button-text">
+          {spinning ? (
+            <>
+              <span className="spinning-icon">🌀</span>
+              GIRANDO...
+            </>
+          ) : (
+            <>
+              <span className="spin-icon">🎯</span>
+              ¡GIRAR LA RULETA!
+            </>
+          )}
+        </span>
+        <div className="button-glow"></div>
       </button>
 
       {/* Popup de ganador */}
@@ -134,17 +166,17 @@ const SpinWheelAlgoland = () => {
         onClose={handleCloseWinner} 
       />
 
-      {/* Decoraciones de borde */}
-      <div 
-        className="fixed top-0 left-0 w-full h-2 bg-yellow-400 
-                  [box-shadow:_0_0_20px_yellow]"
-        aria-hidden="true"
-      />
-      <div 
-        className="fixed bottom-0 left-0 w-full h-2 bg-yellow-400 
-                  [box-shadow:_0_0_20px_yellow]"
-        aria-hidden="true"
-      />
+      
+      {/* Efectos de partículas */}
+      <div className="particles">
+        {[...Array(100)].map((_, i) => (
+          <div key={i} className="particle" style={{
+            '--delay': `${i * 0.5}s`,
+            '--duration': `${3 + Math.random() * 2}s`,
+            '--x': `${Math.random() * 100000}%`
+          }}></div>
+        ))}
+      </div>
     </div>
   );
 };

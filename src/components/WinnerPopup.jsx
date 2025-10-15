@@ -1,27 +1,74 @@
-import React, { useEffect, useRef, memo } from 'react';
+import React, { useEffect, useRef } from 'react';
+import './WinnerPopup.css'; // Archivo de estilos específico
 
-const WinnerPopup = memo(({ winner, onClose }) => {
+const WinnerPopup = ({ winner, onClose }) => {
   const dialogRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (winner && dialog) {
       dialog.focus();
+      
+      // Reproducir sonido de victoria cuando aparece el popup
+      playWinSound();
     }
   }, [winner]);
 
-  if (!winner) return null;
+  const playWinSound = () => {
+    // Crear contexto de audio para el popup
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Fanfarria de victoria más épica para el popup
+      const notes = [
+        { freq: 523.25, duration: 0.3, start: 0 },    // C5
+        { freq: 659.25, duration: 0.3, start: 0.2 },  // E5
+        { freq: 783.99, duration: 0.4, start: 0.4 },  // G5
+        { freq: 1046.50, duration: 0.6, start: 0.6 }, // C6
+        { freq: 1318.51, duration: 0.8, start: 0.8 }  // E6
+      ];
+      
+      notes.forEach((note) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = note.freq;
+        oscillator.type = 'sine';
+        
+        const startTime = audioContext.currentTime + note.start;
+        
+        // Envolvente más dramática
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + note.duration);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + note.duration);
+      });
+    } catch (error) {
+      console.warn('Error playing popup win sound:', error);
+    }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       onClose();
     }
+    if (e.key === 'Enter' || e.key === ' ') {
+      onClose();
+    }
   };
+
+  if (!winner) return null;
 
   return (
     <div 
       ref={dialogRef}
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 animate-fade-in"
+      className="winner-popup-overlay"
       onClick={onClose}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -31,93 +78,57 @@ const WinnerPopup = memo(({ winner, onClose }) => {
       tabIndex={-1}
     >
       <div 
-        className="bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-500 p-8 rounded-3xl max-w-md w-full mx-4 
-                   shadow-2xl border-8 border-yellow-200 animate-bounce-in"
+        className="winner-popup-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-center">
-          <div 
-            className="text-6xl mb-4 animate-spin-once" 
-            aria-hidden="true"
-            role="img"
-          >
-            🎉
-          </div>
+        {/* Efectos de confeti */}
+        <div className="confetti-container">
+          {[...Array(50)].map((_, i) => (
+            <div 
+              key={i}
+              className="confetti"
+              style={{
+                '--delay': `${Math.random() * 3}s`,
+                '--duration': `${1 + Math.random() * 2}s`,
+                '--x': `${Math.random() * 100}%`,
+                '--color': `hsl(${Math.random() * 360}, 100%, 50%)`
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="popup-inner">
+          {/* Icono de celebración */}
+          <div className="celebration-icon">🎉</div>
           
-          <h2 
-            id="winner-title" 
-            className="text-4xl font-black text-gray-900 mb-4 tracking-wider"
-          >
+          {/* Título */}
+          <h1 id="winner-title" className="popup-title">
             ¡FELICIDADES!
-          </h2>
+          </h1>
           
-          <div 
-            id="winner-description"
-            className="bg-white rounded-2xl p-6 mb-6 shadow-inner"
-          >
-            <p className="text-2xl text-gray-700 mb-2 font-semibold">Has ganado:</p>
-            <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
-              {winner.prize}
-            </p>
+          {/* Contenido del premio */}
+          <div className="prize-container">
+            <p className="prize-label">Has ganado:</p>
+            <p className="prize-name">{winner.prize}</p>
           </div>
           
+          {/* Botón de cerrar */}
           <button
             onClick={onClose}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full 
-                     font-bold text-lg hover:scale-110 transform transition-all duration-200 
-                     shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300"
+            className="popup-close-button"
             aria-label="Cerrar mensaje de premio"
             autoFocus
           >
-            ¡Genial! 🎊
+            <span className="button-text">¡Genial! 🎊</span>
+            <div className="button-sparkle"></div>
           </button>
         </div>
+
+        {/* Efecto de brillo alrededor */}
+        <div className="popup-glow"></div>
       </div>
-      
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes bounce-in {
-          0% { 
-            transform: scale(0.3) translateY(-100px);
-            opacity: 0;
-          }
-          50% { 
-            transform: scale(1.05);
-          }
-          70% { 
-            transform: scale(0.9);
-          }
-          100% { 
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes spin-once {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-        
-        .animate-bounce-in {
-          animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        .animate-spin-once {
-          animation: spin-once 0.8s ease-out;
-        }
-      `}</style>
     </div>
   );
-});
-
-WinnerPopup.displayName = 'WinnerPopup';
+};
 
 export default WinnerPopup;
