@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useWheelAnimation } from '../hooks/useWheelAnimation'; // 👈 Ruta corregida
-import { CONFIG } from '../constants/config'; // 👈 Ruta corregida
-import { getResponsiveSize } from '../utils/wheelCalculations'; // 👈 Ruta corregida
+import { useWheelAnimation } from '../hooks/useWheelAnimation';
+import { CONFIG } from '../constants/config';
+import { getResponsiveSize } from '../utils/wheelCalculations';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
 import './SpinWheelAlgoland.css';
 
-const SpinWheelAlgoland = () => {
+// Premios fijos para la demo
+const DEMO_PRIZES = [
+  "Tote Bag", "Camiseta", "QR1", "Gorra", "Mug", 
+  "QR2", "Pin", "Patch", "QR3", "Luggage Tag", "Calcetín"
+];
+
+const SpinWheelDemo = () => {
   const [wheelSize, setWheelSize] = useState(400);
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [isLandscape, setIsLandscape] = useState(false);
-  const [prizes, setPrizes] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState('Conectando...');
   
-  const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(prizes);
+  const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(DEMO_PRIZES);
 
   // Detectar orientación
   useEffect(() => {
@@ -23,7 +27,6 @@ const SpinWheelAlgoland = () => {
       const isLandscapeMode = window.innerWidth > window.innerHeight;
       setIsLandscape(isLandscapeMode);
       
-      // Calcular tamaño basado en el lado más corto
       const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.7;
       setWheelSize(Math.max(350, maxSize));
     };
@@ -37,50 +40,6 @@ const SpinWheelAlgoland = () => {
       window.removeEventListener('orientationchange', checkOrientation);
     };
   }, []);
-
-  // WebSocket connection
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3000');
-    
-    ws.onopen = () => {
-      setConnectionStatus('Conectado');
-      console.log('Conectado al servidor WebSocket');
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        switch (data.type) {
-          case 'prizes_update':
-            setPrizes(data.prizes);
-            break;
-            
-          case 'spin_wheel':
-            if (!spinning && prizes.length > 0) {
-              startSpin();
-            }
-            break;
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-    
-    ws.onclose = () => {
-      setConnectionStatus('Desconectado');
-      console.log('Desconectado del servidor');
-    };
-    
-    ws.onerror = (error) => {
-      setConnectionStatus('Error de conexión');
-      console.error('WebSocket error:', error);
-    };
-    
-    return () => {
-      ws.close();
-    };
-  }, [spinning, prizes.length, startSpin]);
 
   // Efecto para anuncios de accesibilidad
   useEffect(() => {
@@ -115,25 +74,13 @@ const SpinWheelAlgoland = () => {
     handleSpin();
   }, [spinning, handleSpin]);
 
-  if (!prizes || prizes.length === 0) {
-    return (
-      <div className="spin-wheel-container error">
-        <div className="connection-indicator error">
-          <div className="status-dot"></div>
-          {connectionStatus} - Esperando premios del servidor...
-        </div>
-        <div className="text-2xl text-white font-bold">Cargando premios...</div>
-      </div>
-    );
-  }
-
   return (
     <div className={`spin-wheel-container forced-portrait ${isLandscape ? 'landscape-warning' : ''}`}>
       
-      {/* Indicador de conexión */}
-      <div className={`connection-indicator ${connectionStatus === 'Conectado' ? 'connected' : 'error'}`}>
-        <div className={`status-dot ${connectionStatus === 'Conectado' ? 'connected' : ''}`}></div>
-        {connectionStatus}
+      {/* Info Demo */}
+      <div className="demo-info">
+        <div className="status-dot connected"></div>
+        Modo Demo - Premios fijos
       </div>
 
       {/* Anuncios de accesibilidad */}
@@ -152,20 +99,21 @@ const SpinWheelAlgoland = () => {
           <span className="title-line accent">FORTUNE!</span>
         </h1>
         <div className="title-underline"></div>
+        <p className="demo-subtitle">Versión Demo - 11 premios predefinidos</p>
       </div>
 
       {/* Contenedor de la ruleta */}
       <div className="wheel-container">
         <WheelCanvas 
           angle={angle} 
-          prizes={prizes}
+          prizes={DEMO_PRIZES}
           winnerIndex={winner?.index}
           size={wheelSize}
         />
         
         <FlickerPointer 
           angle={angle} 
-          prizes={prizes}
+          prizes={DEMO_PRIZES}
           wheelSize={wheelSize}
           velocity={velocity}
         />
@@ -175,7 +123,7 @@ const SpinWheelAlgoland = () => {
       <button
         onClick={handleSpin}
         onTouchStart={handleTouchStart}
-        disabled={spinning || prizes.length === 0}
+        disabled={spinning}
         aria-label={spinning ? "Girando la ruleta" : "Girar la ruleta"}
         className={`spin-button tv-button ${spinning ? 'spinning' : ''}`}
       >
@@ -199,7 +147,7 @@ const SpinWheelAlgoland = () => {
       <WinnerPopup 
         winner={showWinner ? winner : null} 
         onClose={handleCloseWinner}
-        autoCloseTime={15000}
+        autoCloseTime={10000} // 10 segundos en demo
       />
 
       {/* Efectos de borde */}
@@ -220,8 +168,13 @@ const SpinWheelAlgoland = () => {
           />
         ))}
       </div>
+
+      {/* Info para usuarios */}
+      <div className="github-info">
+        <p>💡 <strong>¿Versión completa?</strong> Clona el repositorio y ejecuta localmente para tener panel de control en tiempo real.</p>
+      </div>
     </div>
   );
 };
 
-export default SpinWheelAlgoland;
+export default SpinWheelDemo;

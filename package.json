@@ -1,19 +1,20 @@
 {
   "name": "spin-wheel-algoland",
-  "private": true,
-  "version": "1.0.0",
   "type": "module",
-  "homepage": "https://changodiez.github.io/spinWheel",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "build:demo": "vite build --outDir docs",
+    "deploy": "npm run build:demo && gh-pages -d docs",
+    "server": "node server.js",
+    "start": "npm run build && npm run server"
   },
   "dependencies": {
+    "express": "^4.21.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

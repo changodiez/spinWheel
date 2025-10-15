@@ -20,10 +20,10 @@ export const CONFIG = {
     POINTER: {
       BEND_INTENSITY: 500,
       DAMPING: 0.85,
-      ANIMATION_INTERVAL: 16
+      ANIMATION_INTERVAL: 2
     },
     SOUND: {
-      TICK_FREQUENCY: 800,
+      TICK_FREQUENCY: 900,
       WIN_NOTES: [523.25, 659.25, 783.99, 1046.50],
       WIN_NOTE_DURATION: 0.15
     },

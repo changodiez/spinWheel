@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel - Demo</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a, #581c87);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 2px solid #fbbf24;
+        }
+        
+        h1 {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+        
+        .warning {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            border: 1px solid #ef4444;
+        }
+        
+        .links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            background: #f59e0b;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn.demo {
+            background: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎡 Spin Wheel Algoland</h1>
+        <p>Esta es una demostración estática de la ruleta.</p>
+        
+        <div class="warning">
+            <h3>⚠️ Versión Limitada</h3>
+            <p>La versión completa con panel de control en tiempo real requiere un servidor local con Node.js.</p>
+        </div>
+        
+        <div class="features">
+            <h3>✨ Características incluidas:</h3>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Ruleta interactiva con física realista</li>
+                <li>Efectos de sonido y animaciones</li>
+                <li>Diseño responsive para TV vertical</li>
+                <li>11 premios predefinidos</li>
+            </ul>
+        </div>
+        
+        <div class="links">
+            <a href="demo.html" class="btn demo">🎮 Ver Demo</a>
+            <a href="https://github.com/tu-usuario/spinWheel" class="btn">📦 Código Fuente</a>
+        </div>
+    </div>
+</body>
+</html>

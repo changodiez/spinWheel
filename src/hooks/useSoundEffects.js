@@ -68,7 +68,7 @@ export const useSoundEffects = () => {
     if (!ctx) return;
 
     try {
-      // Fanfarria de victoria más elaborada
+      // Fanfarria de victoria
       const notes = [
         { freq: 523.25, duration: 0.2 }, // C5
         { freq: 659.25, duration: 0.2 }, // E5
