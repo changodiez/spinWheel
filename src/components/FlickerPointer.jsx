@@ -72,7 +72,7 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
 
   const pointerStyle = {
     position: 'absolute',
-    top: '0%',
+    top: '4%',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 20,

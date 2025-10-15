@@ -198,12 +198,11 @@ const SpinWheelAlgoland = () => {
           {spinning ? (
             <>
               <span className="spinning-icon">🌀</span>
-              GIRANDO...
+              SPINING...
             </>
           ) : (
             <>
-              <span className="spin-icon">🎯</span>
-              ¡GIRAR LA RULETA!
+              SPIN THE WHEEL!
             </>
           )}
         </span>
