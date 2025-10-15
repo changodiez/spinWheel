@@ -45,7 +45,7 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   // Calcular posición exacta del puntero
   const pointerStyle = {
     position: 'absolute',
-    top: '5%',
+    top: '17%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     zIndex: 20,

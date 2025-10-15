@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, memo } from 'react';
-import { generateColor, getTextColor } from '../utils/wheelCalculations';
+import { generateColor } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
 
 const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
@@ -81,22 +81,22 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.translate(radius * 0.7, 0);
       ctx.rotate(Math.PI / 2);
       
-      // Color del texto basado en el fondo
-      const textColor = isWinner ? "#000000" : getTextColor(segmentColor);
+      // Color del texto - SIEMPRE BLANCO para mejor contraste
+      const textColor = "#FFFFFF";
       
       // Estilos especiales para QR codes
       const isQR = prize.startsWith('QR');
-      const fontSize = isQR ? 'bold 16px' : 'bold 14px';
-      const winnerFontSize = isQR ? 'bold 18px' : 'bold 16px';
+      const fontSize = isQR ? 'bold 22px' : 'bold 22px';
+      const winnerFontSize = isQR ? 'bold 23px' : 'bold 23px';
       
       ctx.fillStyle = textColor;
       ctx.font = isWinner ? `${winnerFontSize} 'Arial Black', sans-serif` : `${fontSize} 'Arial Black', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.shadowColor = "#000000";
-      ctx.shadowBlur = 3;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
+      ctx.shadowBlur = 8; // Aumentar sombra para mejor legibilidad
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
       
       const maxTextWidth = radius * 0.9;
       let currentFont = ctx.font;
@@ -135,7 +135,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
   return (
     <canvas 
       ref={canvasRef}
-      className="shadow-2xl"
+      className="wheel-canvas"
       aria-label="Ruleta de premios giratoria"
       role="img"
     />
