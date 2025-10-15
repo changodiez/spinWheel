@@ -1,49 +1,50 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useWheelAnimation } from '../hooks/useWheelAnimation'; // 👈 Ruta corregida
-import { CONFIG } from '../constants/config'; // 👈 Ruta corregida
-import { getResponsiveSize } from '../utils/wheelCalculations'; // 👈 Ruta corregida
+import { useWheelAnimation } from '../hooks/useWheelAnimation';
+import { CONFIG } from '../constants/config';
+import { getResponsiveSize } from '../utils/wheelCalculations';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
 import './SpinWheelAlgoland.css';
+
+// Premios fijos para GitHub Pages
+const DEFAULT_PRIZES = [
+  "Tote Bag", "Camiseta", "QR1", "Gorra", "Mug", 
+  "QR2", "Pin", "Patch", "QR3", "Luggage Tag", "Calcetín"
+];
 
 const SpinWheelAlgoland = () => {
   const [wheelSize, setWheelSize] = useState(400);
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [isLandscape, setIsLandscape] = useState(false);
-  const [prizes, setPrizes] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState('Conectando...');
+  const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
+  const [connectionStatus, setConnectionStatus] = useState('');
+  const [isDemoMode, setIsDemoMode] = useState(false);
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(prizes);
 
-  // Detectar orientación
+  // Detectar si estamos en GitHub Pages (demo) o local (completo)
   useEffect(() => {
-    const checkOrientation = () => {
-      const isLandscapeMode = window.innerWidth > window.innerHeight;
-      setIsLandscape(isLandscapeMode);
-      
-      // Calcular tamaño basado en el lado más corto
-      const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.7;
-      setWheelSize(Math.max(350, maxSize));
-    };
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    setIsDemoMode(isGitHubPages);
     
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-    
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
+    if (isGitHubPages) {
+      setConnectionStatus('Modo Demo - Premios Fijos');
+      setPrizes(DEFAULT_PRIZES);
+    } else {
+      setConnectionStatus('Conectando al servidor...');
+      // Solo conectar WebSocket si NO estamos en GitHub Pages
+      connectToWebSocket();
+    }
   }, []);
 
-  // WebSocket connection
-  useEffect(() => {
+  // WebSocket connection solo para local
+  const connectToWebSocket = () => {
     const ws = new WebSocket('ws://localhost:3000');
     
     ws.onopen = () => {
-      setConnectionStatus('Conectado');
+      setConnectionStatus('Conectado - Modo Completo');
       console.log('Conectado al servidor WebSocket');
     };
     
@@ -68,19 +69,40 @@ const SpinWheelAlgoland = () => {
     };
     
     ws.onclose = () => {
-      setConnectionStatus('Desconectado');
-      console.log('Desconectado del servidor');
+      if (!isDemoMode) {
+        setConnectionStatus('Desconectado - Usando premios locales');
+        // Si se desconecta, usar premios por defecto
+        setPrizes(DEFAULT_PRIZES);
+      }
     };
     
     ws.onerror = (error) => {
-      setConnectionStatus('Error de conexión');
-      console.error('WebSocket error:', error);
+      if (!isDemoMode) {
+        setConnectionStatus('Error de conexión - Modo Local');
+        setPrizes(DEFAULT_PRIZES);
+      }
+    };
+  };
+
+  // Detectar orientación
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isLandscapeMode = window.innerWidth > window.innerHeight;
+      setIsLandscape(isLandscapeMode);
+      
+      const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.7;
+      setWheelSize(Math.max(350, maxSize));
     };
     
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    
     return () => {
-      ws.close();
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
     };
-  }, [spinning, prizes.length, startSpin]);
+  }, []);
 
   // Efecto para anuncios de accesibilidad
   useEffect(() => {
@@ -115,25 +137,18 @@ const SpinWheelAlgoland = () => {
     handleSpin();
   }, [spinning, handleSpin]);
 
-  if (!prizes || prizes.length === 0) {
-    return (
-      <div className="spin-wheel-container error">
-        <div className="connection-indicator error">
-          <div className="status-dot"></div>
-          {connectionStatus} - Esperando premios del servidor...
-        </div>
-        <div className="text-2xl text-white font-bold">Cargando premios...</div>
-      </div>
-    );
-  }
-
   return (
     <div className={`spin-wheel-container forced-portrait ${isLandscape ? 'landscape-warning' : ''}`}>
       
       {/* Indicador de conexión */}
-      <div className={`connection-indicator ${connectionStatus === 'Conectado' ? 'connected' : 'error'}`}>
-        <div className={`status-dot ${connectionStatus === 'Conectado' ? 'connected' : ''}`}></div>
+      <div className={`connection-indicator ${isDemoMode ? 'demo' : connectionStatus.includes('Conectado') ? 'connected' : 'error'}`}>
+        <div className={`status-dot ${isDemoMode ? 'demo' : connectionStatus.includes('Conectado') ? 'connected' : ''}`}></div>
         {connectionStatus}
+        {isDemoMode && (
+          <span style={{marginLeft: '0.5rem', fontSize: '0.7rem', opacity: '0.8'}}>
+            (Panel no disponible)
+          </span>
+        )}
       </div>
 
       {/* Anuncios de accesibilidad */}
@@ -152,6 +167,9 @@ const SpinWheelAlgoland = () => {
           <span className="title-line accent">FORTUNE!</span>
         </h1>
         <div className="title-underline"></div>
+        {isDemoMode && (
+          <p className="demo-subtitle">Versión Demo - 11 premios predefinidos</p>
+        )}
       </div>
 
       {/* Contenedor de la ruleta */}
@@ -195,11 +213,12 @@ const SpinWheelAlgoland = () => {
         <div className="button-glow"></div>
       </button>
 
+
       {/* Popup de ganador */}
       <WinnerPopup 
         winner={showWinner ? winner : null} 
         onClose={handleCloseWinner}
-        autoCloseTime={15000}
+        autoCloseTime={isDemoMode ? 8000 : 15000}
       />
 
       {/* Efectos de borde */}

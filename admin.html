@@ -176,7 +176,6 @@
             border: 1px solid #fbbf24;
         }
 
-        /* Responsive */
         @media (max-width: 480px) {
             .admin-container {
                 padding: 1rem;
@@ -230,7 +229,6 @@
         let ws;
         let prizes = [];
         
-        // Obtener la URL del servidor automáticamente
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const hostname = window.location.hostname;
         const serverUrl = `${protocol}//${hostname}:3000`;
@@ -259,7 +257,6 @@
                 
                 ws.onclose = () => {
                     updateStatus('Desconectado', false);
-                    // Reconectar después de 3 segundos
                     setTimeout(connect, 3000);
                 };
                 
@@ -349,12 +346,10 @@
             });
         }
         
-        // Enter key para agregar premios
         document.getElementById('newPrizeInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addPrize();
         });
         
-        // Iniciar conexión
         connect();
     </script>
 </body>

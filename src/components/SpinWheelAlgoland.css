@@ -321,3 +321,35 @@
     font-size: 0.9rem;
     line-height: 1.4;
   }
+  /* Indicador de conexión para demo */
+.connection-indicator.demo {
+    background: rgba(245, 158, 11, 0.8);
+  }
+  
+  .status-dot.demo {
+    background: #f59e0b;
+    animation: pulse 2s infinite;
+  }
+  
+  .github-info {
+    background: rgba(251, 191, 36, 0.1);
+    padding: 1rem;
+    border-radius: 15px;
+    margin-top: 1rem;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    max-width: 500px;
+    text-align: center;
+  }
+  
+  .github-info p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .demo-subtitle {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+  }

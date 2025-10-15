@@ -2,7 +2,8 @@ import express from 'express';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, extname } from 'path';
+import { readdirSync } from 'fs'; // 👈 AGREGAR ESTA IMPORTACIÓN
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,11 +12,22 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ 
   server,
-  perMessageDeflate: false // 👈 Ayuda con conexiones inestables
+  perMessageDeflate: false
 });
 
-// Servir archivos estáticos
-app.use(express.static(join(__dirname, 'dist')));
+// Servir archivos estáticos con MIME types correctos
+app.use('/assets', express.static(join(__dirname, 'docs/assets'), {
+  setHeaders: (res, path) => {
+    const ext = extname(path);
+    if (ext === '.js') {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (ext === '.css') {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
+app.use(express.static(join(__dirname, 'docs')));
 app.use(express.json());
 
 // Estado de los premios
@@ -32,7 +44,6 @@ wss.on('connection', (ws, req) => {
   console.log('Nuevo cliente conectado desde:', req.socket.remoteAddress);
   clients.push(ws);
   
-  // Enviar premios actuales al nuevo cliente
   try {
     ws.send(JSON.stringify({
       type: 'prizes_update',
@@ -93,17 +104,16 @@ function broadcastToAll(message) {
   });
 }
 
-// Ruta para la ruleta principal
+// Rutas específicas
 app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, 'dist', 'index.html'));
+  res.sendFile(join(__dirname, 'docs', 'index.html'));
 });
 
-// Ruta para el panel admin
 app.get('/admin', (req, res) => {
-  res.sendFile(join(__dirname, 'dist', 'admin.html'));
+  res.sendFile(join(__dirname, 'docs', 'admin.html'));
 });
 
-// API REST para premios (backup)
+// API REST
 app.get('/api/prizes', (req, res) => {
   res.json(prizes);
 });
@@ -126,10 +136,39 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Ruta para servir archivos JS/CSS específicos
+app.get('/assets/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = join(__dirname, 'docs', 'assets', filename);
+  
+  // Establecer MIME type correcto
+  if (filename.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (filename.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  }
+  
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error sirviendo archivo:', filename, err);
+      res.status(404).send('Archivo no encontrado');
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🎡 Servidor ruleta ejecutándose en http://localhost:${PORT}`);
   console.log(`📱 Panel admin disponible en http://localhost:${PORT}/admin`);
-  console.log(`🌐 Accesible desde la red local en: http://[TU-IP]:${PORT}`);
-  console.log(`❤️  Health check: http://localhost:${PORT}/health`);
+  
+  // Mostrar archivos de forma segura
+  try {
+    const files = readdirSync(join(__dirname, 'docs'));
+    console.log(`📊 Archivos en docs/:`);
+    files.forEach(file => {
+      console.log(`   - ${file}`);
+    });
+  } catch (error) {
+    console.log('📊 No se pudo leer la carpeta docs/');
+  }
 });

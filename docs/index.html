@@ -1,97 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin Wheel Algoland</title>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/spinWheel/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Ruleta de la fortuna interactiva - Spin Wheel Algoland" />
+    <title>Spin Wheel - Ruleta de Premios</title>
+    
     <style>
-        body {
-            background: linear-gradient(135deg, #1e3a8a, #581c87);
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 2rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .container {
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3rem;
-            border-radius: 20px;
-            border: 2px solid #fbbf24;
-        }
-        
-        h1 {
-            color: #fbbf24;
-            margin-bottom: 1rem;
-        }
-        
-        .status {
-            background: rgba(16, 185, 129, 0.2);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 2rem 0;
-            border: 1px solid #10b981;
-        }
-        
-        .links {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 1rem 2rem;
-            background: #f59e0b;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-            transition: transform 0.3s;
-        }
-        
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .btn.demo {
-            background: #10b981;
-        }
-        
-        .btn.github {
-            background: #3b82f6;
-        }
+      /* Loading mejorado */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        font-family: Arial, sans-serif;
+        transition: opacity 0.5s ease;
+      }
+      
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fbbf24;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      
+      .loading-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎡 Spin Wheel Algoland</h1>
-        <p>Ruleta interactiva para eventos</p>
-        
-        <div class="status">
-            <h3>✅ Sistema Funcional</h3>
-            <p>El proyecto está activo y funcionando correctamente.</p>
-        </div>
-        
-        <div class="info">
-            <h3>📦 Versiones Disponibles</h3>
-            <ul style="text-align: left; display: inline-block;">
-                <li><strong>GitHub Pages</strong>: Demo estática</li>
-                <li><strong>Local</strong>: Versión completa con panel de control</li>
-            </ul>
-        </div>
-        
-        <div class="links">
-            <a href="https://changodiez.github.io/spinWheel/demo.html" class="btn demo">🎮 Ver Demo</a>
-            <a href="https://github.com/changodiez/spinWheel" class="btn github">📦 Código Fuente</a>
-        </div>
+    <script type="module" crossorigin src="/spinWheel/assets/main-2a56643b.js"></script>
+    <link rel="stylesheet" href="/spinWheel/assets/index-5bdd0cfc.css">
+  </head>
+  <body>
+    <div id="loading">
+      <div style="text-align: center;">
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando Ruleta...</div>
+      </div>
     </div>
-</body>
+    
+    <div id="root"></div>
+    
+    <script>
+      // Script para remover loading
+      function removeLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => {
+            if (loading.parentNode) {
+              loading.parentNode.removeChild(loading);
+            }
+          }, 500);
+        }
+      }
+      
+      window.addEventListener('load', removeLoading);
+      setTimeout(removeLoading, 5000);
+    </script>
+    
+    <!-- 👇 RUTA RELATIVA CORRECTA -->
+    
+  </body>
 </html>

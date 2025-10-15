@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import AppDemo from './AppDemo.jsx'
+import SpinWheelDemo from './components/SpinWheelDemo'
 import './index.css'
 
 // Remover loading screen
@@ -16,6 +16,6 @@ if (loading) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AppDemo />
+    <SpinWheelDemo />
   </React.StrictMode>,
 )

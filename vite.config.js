@@ -11,11 +11,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        demo: resolve(__dirname, 'demo.html') // 👈 Build para demo
+        admin: resolve(__dirname, 'admin.html')
       }
     }
-  },
-  server: {
-    port: 3001
   }
 })
