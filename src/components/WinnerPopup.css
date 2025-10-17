@@ -4,14 +4,15 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.8); /* ✅ Aumentado opacidad para mejor contraste */
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.5s ease-out;
-  overflow: hidden; /* ✅ Permitir que el confeti se mueva libremente */
+  overflow: hidden;
+  cursor: pointer; /* ✅ Indicar que es clickeable */
 }
 
 .winner-popup-content {
@@ -23,24 +24,31 @@
     #8A2BE2 75%,    /* Violeta */
     #9932CC 100%    /* Violeta oscuro */
   );
-
   padding: 3rem;
   border-radius: 2rem;
   max-width: 90vw;
   width: 100%;
   max-width: 500px;
-  display: flex;
+  /* ✅ ELIMINADO: display: flex (causaba problemas) */
+  border: 2px solid; /* ✅ Agregado border sólido */
   border-image: linear-gradient(45deg, #0033A0, #0055FF, #8A2BE2) 1;
   animation: popupAppear 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  overflow: visible; /* ✅ Cambiado de hidden a visible */
+  overflow: visible;
+  cursor: default; /* ✅ Cursor normal dentro del contenido */
+  
+  /* ✅ Agregar sombras que faltaban */
+  box-shadow: 
+    0 0 80px rgba(0, 85, 255, 0.6),
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 2px 10px rgba(255, 255, 255, 0.2);
 }
 
 .popup-inner {
   position: relative;
   z-index: 2;
   text-align: center;
+  width: 100%; /* ✅ Asegurar ancho completo */
 }
-
 
 /* Contenedor de imagen del producto */
 .prize-image-container {
@@ -113,6 +121,7 @@
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 2px dashed rgba(0, 85, 255, 0.5);
+  text-align: center; /* ✅ Asegurar centrado */
 }
 
 /* Botón para cierre físico */
@@ -133,6 +142,7 @@
     0 0 30px rgba(0, 85, 255, 0.3);
   animation: buttonPulse 3s infinite;
   min-width: 280px;
+  display: inline-block; /* ✅ Asegurar display correcto */
 }
 
 .physical-close-button:hover {
@@ -170,6 +180,15 @@
   left: 100%;
 }
 
+/* ✅ Mensaje de auto-cierre */
+.auto-close-message {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  font-style: italic;
+  font-weight: 500;
+}
+
 /* Instrucción del botón */
 .button-instruction {
   margin-top: 0.8rem;
@@ -198,9 +217,10 @@
   z-index: -1;
   filter: blur(20px);
   opacity: 0.6;
+  animation: rotateGlow 3s linear infinite; /* ✅ Agregar animación que faltaba */
 }
 
-/* ANIMACIONES (mantener las existentes pero actualizar colores) */
+/* ANIMACIONES */
 @keyframes titleGlow {
   from { 
     text-shadow: 
@@ -228,7 +248,6 @@
   }
 }
 
-/* Mantener las otras animaciones igual pero con nuevos colores */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popupAppear {
   0% { opacity: 0; transform: scale(0.3) translateY(100px) rotate(-10deg); }
@@ -247,7 +266,7 @@
   .prize-container { padding: 1.5rem; }
   .prize-image { font-size: 4rem; }
   .physical-close-button { padding: 1rem 1.5rem; font-size: 1.1rem; min-width: 250px; }
-  .button-instruction { font-size: 0.8rem; }
+  .button-instruction, .auto-close-message { font-size: 0.8rem; }
 }
 
 /* Para TV */
@@ -257,5 +276,5 @@
   .prize-name { font-size: 2.5rem; }
   .prize-image { font-size: 6rem; }
   .physical-close-button { font-size: 1.5rem; padding: 1.5rem 3rem; min-width: 350px; }
-  .button-instruction { font-size: 1.1rem; }
+  .button-instruction, .auto-close-message { font-size: 1.1rem; }
 }

@@ -21,8 +21,46 @@ const SpinWheelAlgoland = () => {
   const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [cursorVisible, setCursorVisible] = useState(true); // ✅ Nuevo estado para el cursor
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(prizes);
+
+  // ✅ Detectar tecla "C" para ocultar/mostrar cursor
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'c' || e.key === 'C') {
+        setCursorVisible(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
+
+  // ✅ Click en cualquier parte de la pantalla para girar
+
+useEffect(() => {
+  const handleGlobalClick = (e) => {
+    // No girar si:
+    // - Ya está girando
+    // - No hay premios
+    // - El click fue en el botón de spin 
+    // - El click fue dentro de un popup
+    if (!spinning && 
+        prizes.length > 0 &&
+        !e.target.closest('.winner-popup-overlay')) {
+      startSpin();
+    }
+  };
+
+  document.addEventListener('click', handleGlobalClick);
+
+  return () => {
+    document.removeEventListener('click', handleGlobalClick);
+  };
+}, [spinning, prizes.length, startSpin]); 
 
   // Detectar si estamos en GitHub Pages (demo) o local (completo)
   useEffect(() => {
@@ -138,7 +176,10 @@ const SpinWheelAlgoland = () => {
   }, [spinning, handleSpin]);
 
   return (
-    <div className={`spin-wheel-container forced-portrait ${isLandscape ? 'landscape-warning' : ''}`}>
+    <div 
+      className={`spin-wheel-container forced-portrait ${isLandscape ? 'landscape-warning' : ''} ${!cursorVisible ? 'no-cursor' : ''}`} // ✅ Clase condicional
+      style={{ cursor: cursorVisible ? 'default' : 'none' }} // ✅ Estilo inline para el cursor
+    >
       
       {/* Indicador de conexión */}
       <div className={`connection-indicator ${isDemoMode ? 'demo' : connectionStatus.includes('Conectado') ? 'connected' : 'error'}`}>
@@ -150,6 +191,7 @@ const SpinWheelAlgoland = () => {
           </span>
         )}
       </div>
+
 
       {/* Anuncios de accesibilidad */}
       <div 
@@ -209,7 +251,6 @@ const SpinWheelAlgoland = () => {
         <div className="button-glow"></div>
       </button>
 
-
       {/* Popup de ganador */}
       <WinnerPopup 
         winner={showWinner ? winner : null} 
@@ -220,8 +261,6 @@ const SpinWheelAlgoland = () => {
       {/* Efectos de borde */}
       <div className="border-effect top"></div>
       <div className="border-effect bottom"></div>
-
-
     </div>
   );
 };
