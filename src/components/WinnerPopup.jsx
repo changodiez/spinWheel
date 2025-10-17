@@ -1,20 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react'; // ✅ Agregar useState
-import './WinnerPopup.css';
-
-// Mapeo de imágenes para cada premio
-const PRIZE_IMAGES = {
-  "Tote Bag": "🎒",
-  "Camiseta": "👕", 
-  "QR1": "📱",
-  "Gorra": "🧢",
-  "Mug": "☕",
-  "QR2": "📱",
-  "Pin": "📌",
-  "Patch": "🧵",
-  "QR3": "📱",
-  "Luggage Tag": "🏷️",
-  "Calcetín": "🧦"
-};
 
 // MAPEO CUANDO TENGA LAS IMAGENES 
 /*
@@ -32,64 +15,84 @@ const PRIZE_IMAGES = {
   "Calcetín": { type: "image", src: "/images/premios/calcetin.jpg" }
 };
 */
+import React, { useEffect, useRef, useState } from 'react';
+import './WinnerPopup.css';
+
+// Mapeo de emojis para premios
+const PRIZE_IMAGES = {
+  "Tote Bag": "🎒",
+  "Camiseta": "👕", 
+  "QR1": "📱",
+  "Gorra": "🧢",
+  "Mug": "☕",
+  "QR2": "📱",
+  "Pin": "📌",
+  "Patch": "🧵",
+  "QR3": "📱",
+  "Luggage Tag": "🏷️",
+  "Calcetín": "🧦"
+};
 
 const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
   const dialogRef = useRef(null);
   const timerRef = useRef(null);
-  const [preventClose, setPreventClose] = useState(false); // ✅ Nuevo estado
+  const [preventClose, setPreventClose] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (winner) {
-      // ✅ Detectar tecla "W" para prevenir cierre
+      // Tecla "W" para prevenir cierre (modo desarrollo)
       const handleKeyPress = (e) => {
         if (e.key === 'w' || e.key === 'W') {
           setPreventClose(prev => !prev);
-          console.log('Modo prevención de cierre:', !preventClose);
         }
       };
 
       window.addEventListener('keydown', handleKeyPress);
 
-      // Configurar timer de cierre automático (solo si no está prevenido)
+      // Timer de cierre automático
       if (!preventClose) {
         timerRef.current = setTimeout(() => {
-          onClose();
+          handleClose();
         }, autoCloseTime);
       }
 
-      // ✅ Agregar event listener para click en cualquier lugar (solo si no está prevenido)
+      // Click en cualquier lugar para cerrar
       const handleClickAnywhere = () => {
         if (!preventClose) {
-          onClose();
+          handleClose();
         }
       };
 
-      // Pequeño delay para evitar que se cierre inmediatamente al ganar
+      // Delay para evitar cierre inmediato
       const clickTimeout = setTimeout(() => {
         if (!preventClose) {
           document.addEventListener('click', handleClickAnywhere);
         }
       }, 500);
 
-      // Limpiar al desmontar
+      // Cleanup
       return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
+        if (timerRef.current) clearTimeout(timerRef.current);
         clearTimeout(clickTimeout);
         document.removeEventListener('click', handleClickAnywhere);
         window.removeEventListener('keydown', handleKeyPress);
       };
     }
-  }, [winner, onClose, autoCloseTime, preventClose]); // ✅ Agregar preventClose a dependencias
+  }, [winner, onClose, autoCloseTime, preventClose]);
 
+  // Manejar cierre con animación
   const handleClose = () => {
-    if (!preventClose) {
-      onClose();
+    if (!preventClose && !isClosing) {
+      setIsClosing(true);
+      setTimeout(() => {
+        onClose();
+        setIsClosing(false);
+      }, 400);
     }
   };
 
-  // ✅ Prevenir que clicks dentro del popup cierren el popup
+  // Prevenir cierre al hacer click dentro del popup
   const handlePopupClick = (e) => {
     e.stopPropagation();
   };
@@ -101,35 +104,25 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
   return (
     <div 
       ref={dialogRef}
-      className="winner-popup-overlay"
+      className={`winner-popup-overlay ${isClosing ? 'closing' : ''}`}
       role="dialog"
       aria-labelledby="winner-title"
       aria-describedby="winner-description"
       aria-modal="true"
-      onClick={handleClose} // ✅ Click en el overlay = cerrar (si no está prevenido)
+      onClick={handleClose}
     >
       <div 
         className="winner-popup-content"
-        onClick={handleClose}// ✅ Click en el contenido = NO cerrar
+        onClick={handleClose}
       >
-        
         <div className="popup-inner">
-          {/* Icono de celebración */}
           <div className="celebration-icon">🎉</div>
-          
-          {/* Título */}
-          <h1 id="winner-title" className="popup-title">
-            YOU WIN!
-          </h1>
-          
-          {/* Imagen del producto */}
+          <h1 id="winner-title" className="popup-title">YOU WIN!</h1>
           <div className="prize-image-container">
             <div className="prize-image" role="img" aria-label={winner.prize}>
               {prizeImage}
             </div>
           </div>
-          
-          {/* Contenido del premio */}
           <div className="prize-container">
             <p className="prize-name">{winner.prize}</p>
           </div>
