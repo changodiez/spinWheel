@@ -277,5 +277,17 @@
 .connection-indicator.demo {
     background: rgba(245, 158, 11, 0.8);
   }
+
+  /* Cuando el popup está abierto, el cursor se comporta igual que en el contenedor principal */
+.winner-popup-overlay,
+.winner-popup-overlay * {
+  cursor: inherit; /* ✅ Hereda el cursor del contenedor padre */
+}
+
+/* Asegurar que el contenedor principal controle el cursor */
+.spin-wheel-container.no-cursor .winner-popup-overlay,
+.spin-wheel-container.no-cursor .winner-popup-overlay * {
+  cursor: none !important;
+}
   
  
