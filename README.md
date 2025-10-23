@@ -14,7 +14,7 @@ Para usar todas las funciones (panel de control en tiempo real):
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/tu-usuario/spinWheel.git
+git clone https://github.com/changodiez/spinWheel.git
 cd spinWheel
 
 # Instalar dependencias
