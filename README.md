@@ -4,7 +4,7 @@ Una ruleta interactiva para eventos, con panel de control en tiempo real.
 
 ## 🚀 Demo Online
 
-[🔗 Ver Demo en GitHub Pages](https://tu-usuario.github.io/spinWheel/)
+[🔗 Ver Demo en GitHub Pages](https://changodiez.github.io/spinWheel/)
 
 *Nota: La demo online es una versión limitada. La versión completa requiere servidor local.*
 
