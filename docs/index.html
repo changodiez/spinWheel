@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/spinWheel/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Ruleta de la fortuna interactiva - Spin Wheel Algoland" />
+    <title>Spin Wheel - Ruleta de Premios</title>
+    
+    <style>
+      /* Loading mejorado */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        font-family: Arial, sans-serif;
+        transition: opacity 0.5s ease;
+      }
+      
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fbbf24;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+      
+      .loading-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <script type="module" crossorigin src="/spinWheel/assets/main-d9e2e912.js"></script>
+    <link rel="stylesheet" href="/spinWheel/assets/index-9c4aa7c7.css">
+  </head>
+  <body>
+    <div id="loading">
+      <div style="text-align: center;">
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando Ruleta...</div>
+      </div>
+    </div>
+    
+    <div id="root"></div>
+    
+    <script>
+      // Script para remover loading
+      function removeLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => {
+            if (loading.parentNode) {
+              loading.parentNode.removeChild(loading);
+            }
+          }, 500);
+        }
+      }
+      
+      window.addEventListener('load', removeLoading);
+      setTimeout(removeLoading, 5000);
+    </script>
+    
+    <!-- 👇 RUTA RELATIVA CORRECTA -->
+    
+  </body>
+</html>

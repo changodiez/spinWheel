@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Ruleta de Premios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #581c87);
+            color: white;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .admin-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(251, 191, 36, 0.5);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+        
+        .status-dot.connected {
+            background: #10b981;
+        }
+        
+        .section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section h2 {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .add-prize {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .add-prize input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+        
+        .add-prize button {
+            padding: 0.75rem 1.5rem;
+            background: #10b981;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .prizes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .prize-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .prize-number {
+            background: #fbbf24;
+            color: #1e293b;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .prize-name {
+            flex: 1;
+            font-size: 1.1rem;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .spin-btn {
+            background: #f59e0b;
+        }
+        
+        .save-btn {
+            background: #3b82f6;
+        }
+        
+        .info {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 10px;
+            border: 1px solid #fbbf24;
+        }
+
+        @media (max-width: 480px) {
+            .admin-container {
+                padding: 1rem;
+            }
+            
+            .add-prize {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>🎮 Panel de Control</h1>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Conectando...</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>➕ Agregar Premio</h2>
+            <div class="add-prize">
+                <input type="text" id="newPrizeInput" placeholder="Nombre del premio..." autocomplete="off">
+                <button onclick="addPrize()">Agregar</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Premios Actuales (<span id="prizesCount">0</span>)</h2>
+            <div class="prizes-list" id="prizesList"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn spin-btn" onclick="spinWheel()">🎡 Girar Ruleta</button>
+            <button class="action-btn save-btn" onclick="savePrizes()">💾 Guardar</button>
+        </div>
+
+        <div class="info">
+            <p><strong>Conectado a:</strong> <span id="serverUrl">...</span></p>
+            <p>Los cambios se aplican instantáneamente</p>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let prizes = [];
+        
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const hostname = window.location.hostname;
+        const serverUrl = `${protocol}//${hostname}:3000`;
+
+        function connect() {
+            try {
+                ws = new WebSocket(serverUrl);
+                
+                ws.onopen = () => {
+                    updateStatus('Conectado', true);
+                    document.getElementById('serverUrl').textContent = serverUrl;
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'prizes_update') {
+                            prizes = data.prizes;
+                            renderPrizes();
+                        }
+                    } catch (error) {
+                        console.error('Error parsing message:', error);
+                    }
+                };
+                
+                ws.onclose = () => {
+                    updateStatus('Desconectado', false);
+                    setTimeout(connect, 3000);
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    updateStatus('Error de conexión', false);
+                };
+            } catch (error) {
+                console.error('Connection error:', error);
+                updateStatus('Error de conexión', false);
+                setTimeout(connect, 3000);
+            }
+        }
+        
+        function updateStatus(message, isConnected) {
+            document.getElementById('statusText').textContent = message;
+            document.getElementById('statusDot').className = 
+                `status-dot ${isConnected ? 'connected' : ''}`;
+        }
+        
+        function sendMessage(message) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(message));
+                return true;
+            }
+            return false;
+        }
+        
+        function addPrize() {
+            const input = document.getElementById('newPrizeInput');
+            const prizeName = input.value.trim();
+            
+            if (prizeName && !prizes.includes(prizeName)) {
+                const newPrizes = [...prizes, prizeName];
+                if (sendMessage({
+                    type: 'update_prizes',
+                    prizes: newPrizes
+                })) {
+                    input.value = '';
+                } else {
+                    alert('Error: No conectado al servidor');
+                }
+            }
+        }
+        
+        function removePrize(index) {
+            const newPrizes = prizes.filter((_, i) => i !== index);
+            sendMessage({
+                type: 'update_prizes',
+                prizes: newPrizes
+            });
+        }
+        
+        function spinWheel() {
+            if (!sendMessage({
+                type: 'spin_wheel'
+            })) {
+                alert('Error: No conectado al servidor');
+            }
+        }
+        
+        function savePrizes() {
+            alert('Premios guardados en el servidor');
+        }
+        
+        function renderPrizes() {
+            const list = document.getElementById('prizesList');
+            const count = document.getElementById('prizesCount');
+            
+            count.textContent = prizes.length;
+            list.innerHTML = '';
+            
+            if (prizes.length === 0) {
+                list.innerHTML = '<div class="prize-item">No hay premios configurados</div>';
+                return;
+            }
+            
+            prizes.forEach((prize, index) => {
+                const item = document.createElement('div');
+                item.className = 'prize-item';
+                item.innerHTML = `
+                    <div class="prize-number">${index + 1}</div>
+                    <div class="prize-name">${prize}</div>
+                    <button class="delete-btn" onclick="removePrize(${index})">🗑️</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        document.getElementById('newPrizeInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addPrize();
+        });
+        
+        connect();
+    </script>
+</body>
+</html>
