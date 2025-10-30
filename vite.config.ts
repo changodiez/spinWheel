@@ -1,18 +1,28 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
-// https://vitejs.dev/config/
+// Detecta si estás en modo producción
+const isProduction = process.env.NODE_ENV === 'production'
+
+// Configuración dinámica de base:
+// - Desarrollo: '/'
+//– Producción: '/spinWheel/' (puedes cambiar según tu subdirectorio)
+const basePath = isProduction ? '/spinWheel/' : '/'
+
 export default defineConfig({
   plugins: [react()],
-  base: '/spinWheel/',
+
+  base: basePath,
+
   server: {
-    host: true, // Escuchar en todas las interfaces
+    host: true,       // Escucha en todas las interfaces
     port: 3000,
     hmr: {
-      overlay: false // Desactiva el overlay de errores si causa problemas
+      overlay: false  // Desactiva overlay de errores si molesta
     }
-
   },
+
   css: {
     modules: {
       localsConvention: 'camelCase'
@@ -21,16 +31,17 @@ export default defineConfig({
 
   build: {
     outDir: 'dist',
-    sourcemap: false, // Para produccion
+    emptyOutDir: true,
+    sourcemap: false,
     chunkSizeWarningLimit: 1600,
-    // Agregar esta configuración para mejor manejo de rutas
     rollupOptions: {
       input: {
-        main: './index.html'
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin.html') // solo si realmente tienes admin.html
       }
     }
   },
-  // Configuración importante para React
+
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   },
