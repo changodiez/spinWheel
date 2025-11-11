@@ -20,7 +20,7 @@
         }
         
         .admin-container {
-            max-width: 500px;
+            max-width: 640px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -51,8 +51,8 @@
         }
         
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #ef4444;
         }
@@ -76,33 +76,37 @@
         
         .add-prize {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             margin-bottom: 1rem;
         }
         
         .add-prize input {
             flex: 1;
-            padding: 0.75rem;
+            padding: 0.9rem;
             border: none;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.9);
             font-size: 1rem;
+            min-height: 48px;
         }
         
         .add-prize button {
-            padding: 0.75rem 1.5rem;
+            padding: 0.9rem 1.5rem;
             background: #10b981;
             border: none;
             border-radius: 10px;
             color: white;
             font-weight: bold;
             cursor: pointer;
+            min-height: 48px;
         }
         
         .prizes-list {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            max-height: 50vh;
+            overflow-y: auto;
         }
         
         .prize-item {
@@ -130,22 +134,25 @@
         .prize-name {
             flex: 1;
             font-size: 1.1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .delete-btn {
             background: #ef4444;
             border: none;
             color: white;
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         
         .action-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
         }
         
         .action-btn {
@@ -157,6 +164,7 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 1rem;
+            min-height: 52px;
         }
         
         .spin-btn {
@@ -176,17 +184,23 @@
             border: 1px solid #fbbf24;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .admin-container {
                 padding: 1rem;
+                border-radius: 16px;
             }
             
             .add-prize {
                 flex-direction: column;
+                gap: 0.5rem;
             }
             
             .action-buttons {
                 flex-direction: column;
+            }
+            
+            .prize-name {
+                font-size: 1rem;
             }
         }
     </style>
@@ -215,8 +229,8 @@
         </div>
 
         <div class="action-buttons">
-            <button class="action-btn spin-btn" onclick="spinWheel()">🎡 Girar Ruleta</button>
-            <button class="action-btn save-btn" onclick="savePrizes()">💾 Guardar</button>
+            <button id="spinBtn" class="action-btn spin-btn" onclick="spinWheel()">🎡 Girar Ruleta</button>
+            <button id="saveBtn" class="action-btn save-btn" onclick="savePrizes()">💾 Guardar</button>
         </div>
 
         <div class="info">
@@ -228,6 +242,7 @@
     <script>
         let ws;
         let prizes = [];
+        let isConnected = false;
         
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const hostname = window.location.hostname;
@@ -239,6 +254,8 @@
                 
                 ws.onopen = () => {
                     updateStatus('Conectado', true);
+                    isConnected = true;
+                    updateButtonsState();
                     document.getElementById('serverUrl').textContent = serverUrl;
                 };
                 
@@ -257,12 +274,16 @@
                 
                 ws.onclose = () => {
                     updateStatus('Desconectado', false);
+                    isConnected = false;
+                    updateButtonsState();
                     setTimeout(connect, 3000);
                 };
                 
                 ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
                     updateStatus('Error de conexión', false);
+                    isConnected = false;
+                    updateButtonsState();
                 };
             } catch (error) {
                 console.error('Connection error:', error);
@@ -275,6 +296,12 @@
             document.getElementById('statusText').textContent = message;
             document.getElementById('statusDot').className = 
                 `status-dot ${isConnected ? 'connected' : ''}`;
+        }
+
+        function updateButtonsState() {
+            const disabled = !isConnected;
+            document.getElementById('spinBtn').disabled = disabled;
+            document.getElementById('saveBtn').disabled = disabled || prizes.length === 0;
         }
         
         function sendMessage(message) {
@@ -296,6 +323,9 @@
                     prizes: newPrizes
                 })) {
                     input.value = '';
+                    prizes = newPrizes;
+                    renderPrizes();
+                    updateButtonsState();
                 } else {
                     alert('Error: No conectado al servidor');
                 }
@@ -308,6 +338,9 @@
                 type: 'update_prizes',
                 prizes: newPrizes
             });
+            prizes = newPrizes;
+            renderPrizes();
+            updateButtonsState();
         }
         
         function spinWheel() {
@@ -319,7 +352,21 @@
         }
         
         function savePrizes() {
-            alert('Premios guardados en el servidor');
+            // Guardado vía API REST del servidor
+            fetch('/api/prizes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prizes })
+            })
+            .then(async res => {
+                if (!res.ok) throw new Error('Error HTTP ' + res.status);
+                const data = await res.json();
+                alert('Premios guardados correctamente');
+            })
+            .catch(err => {
+                console.error(err);
+                alert('No se pudo guardar. Verifica la conexión con el servidor.');
+            });
         }
         
         function renderPrizes() {
