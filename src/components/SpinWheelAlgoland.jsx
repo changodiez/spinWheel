@@ -81,7 +81,6 @@ useEffect(() => {
     const ws = new WebSocket('ws://localhost:3000');
     
     ws.onopen = () => {
-      setConnectionStatus('Conectado - Modo Completo');
       console.log('Conectado al servidor WebSocket');
     };
     
@@ -107,7 +106,6 @@ useEffect(() => {
     
     ws.onclose = () => {
       if (!isDemoMode) {
-        setConnectionStatus('Desconectado - Usando premios locales');
         // Si se desconecta, usar premios por defecto
         setPrizes(DEFAULT_PRIZES);
       }
@@ -115,7 +113,6 @@ useEffect(() => {
     
     ws.onerror = (error) => {
       if (!isDemoMode) {
-        setConnectionStatus('Error de conexión - Modo Local');
         setPrizes(DEFAULT_PRIZES);
       }
     };
@@ -161,17 +158,6 @@ useEffect(() => {
       className={`spin-wheel-container ${!cursorVisible ? 'no-cursor' : ''}`} // ✅ Clase condicional
       style={{ cursor: cursorVisible ? 'default' : 'none' }} // ✅ Estilo inline para el cursor
     >
-      
-      {/* Indicador de conexión */}
-      <div className={`connection-indicator ${isDemoMode ? 'demo' : connectionStatus.includes('Conectado') ? 'connected' : 'error'}`}>
-        <div className={`status-dot ${isDemoMode ? 'demo' : connectionStatus.includes('Conectado') ? 'connected' : ''}`}></div>
-        {connectionStatus}
-        {isDemoMode && (
-          <span style={{marginLeft: '0.5rem', fontSize: '0.7rem', opacity: '0.8'}}>
-            (Panel no disponible)
-          </span>
-        )}
-      </div>
 
 
       {/* Anuncios de accesibilidad */}
