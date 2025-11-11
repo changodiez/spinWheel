@@ -65,10 +65,8 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   }, [bend]);
   
   // Calcular todos los tamaños proporcionales a la rueda
-  const baseSize = wheelSize * 0.07; // 8% del tamaño de la rueda
-  const pointerHeight = wheelSize * 0.12; // 15% del tamaño de la rueda
-  const armWidth = baseSize * 0.3; // 30% del tamaño de la base
-  const arrowSize = baseSize * 1; // 120% del tamaño de la base
+  const pointerWidth = wheelSize * 0.16;
+  const pointerHeight = wheelSize * 0.12;
 
   const pointerStyle = {
     position: 'absolute',
@@ -81,52 +79,15 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
 
   return (
     <div style={pointerStyle}>
-      <div className="pointer-container">
-        {/* Base decorativa - tamaño proporcional */}
-        <div 
-          className="pointer-base"
-          style={{ 
-            width: `${baseSize}px`,
-            height: `${baseSize}px`
-          }}
-        >
-          <div className="base-glow"></div>
-          <div className="base-center"></div>
-        </div>
-        
-        {/* Brazo de la flecha - posiciones proporcionales */}
-        <div 
-          className="pointer-arm-container"
-          style={{ 
-            transform: `rotate(${bend}deg)`,
-            marginTop: `-${baseSize * 0.05}px` // Margen proporcional
-          }}
-        >
-          {/* Brazo con altura proporcional */}
-          <div 
-            className="pointer-arm"
-            style={{ 
-              height: `${pointerHeight}px`,
-              width: `${armWidth}px`
-            }}
-          />
-          
-          {/* Cabeza de la flecha - posición y tamaño proporcionales */}
-          <div 
-            className="arrow-head"
-            style={{
-              width: `${arrowSize}px`,
-              height: `${arrowSize}px`,
-              bottom: `-${pointerHeight + (arrowSize * 0.05)}px` // Posición relativa al brazo
-            }}
-          >
-            <div className="arrow-main">
-              <div className="arrow-glow"></div>
-            </div>
-            <div className="arrow-tip"></div>
-            <div className="arrow-highlight"></div>
-          </div>
-        </div>
+      <div 
+        className="pointer-tip-wrapper"
+        style={{ 
+          '--pointer-width': `${pointerWidth}px`,
+          '--pointer-height': `${pointerHeight}px`,
+          transform: `rotate(${bend}deg)`
+        }}
+      >
+        <div className="pointer-tip-shape"></div>
       </div>
     </div>
   );

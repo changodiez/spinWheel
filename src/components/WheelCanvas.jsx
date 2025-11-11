@@ -85,8 +85,8 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       const textColor = "#FFFFFF";
       
  
-      const fontSize = 'bold 1.1rem';
-      const winnerFontSize = 'bold 1.5rem';
+      const fontSize = 'bold 1.35rem';
+      const winnerFontSize = 'bold 1.85rem';
       
       ctx.fillStyle = textColor;
       ctx.font = isWinner ? `${winnerFontSize} 'Arial Black', sans-serif` : `${fontSize} 'Arial Black', sans-serif`;
@@ -106,8 +106,8 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       
       // Ajustar tamaño de fuente si es necesario
       if (metrics.width > maxTextWidth) {
-        const smallerFontSize = isQR ? "bold 14px" : "bold 12px";
-        const smallerWinnerFontSize = isQR ? "bold 16px" : "bold 14px";
+        const smallerFontSize = isQR ? "bold 18px" : "bold 16px";
+        const smallerWinnerFontSize = isQR ? "bold 20px" : "bold 18px";
         currentFont = isWinner ? `${smallerWinnerFontSize} 'Arial Black', sans-serif` : `${smallerFontSize} 'Arial Black', sans-serif`;
         ctx.font = currentFont;
       }

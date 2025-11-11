@@ -6,8 +6,8 @@
 }
 
 html, body {
-  width: 1080px;
-  height: 1920px;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -19,9 +19,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
 }
 
 /* Tailwind-like utilities */

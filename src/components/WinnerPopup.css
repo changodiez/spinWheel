@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
@@ -22,23 +22,20 @@
 .winner-popup-content {
   position: relative;
   background: linear-gradient(135deg, 
-    #000000 0%,
-    #0033A0 25%, 
-    #0055FF 50%,
-    #8A2BE2 75%,
-    #9932CC 100%
+    #b4acac 0%,
+    #d1ddf6 25%, 
+    #c6d5f5 50%,
+    #d7c1ec 75%,
+    #dcaff2 100%
   );
   padding: 60px;
-  border-radius: 30px;
-  width: 700px;
-  max-width: 90vw;
-  border: 4px solid rgba(0, 85, 255, 0.5);
+  border-radius: 20px;
+  width: 600px;
+  max-width: 70vw;
+
   overflow: visible;
   cursor: default;
-  box-shadow: 
-    0 0 80px rgba(0, 85, 255, 0.6),
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    inset 0 2px 10px rgba(255, 255, 255, 0.2);
+  
   animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s both;
 }
 
@@ -64,7 +61,7 @@
 }
 
 .celebration-icon {
-  font-size: 96px;
+  font-size: 60px;
   margin-bottom: 20px;
   animation: 
     bounce 0.8s ease-in-out,
@@ -75,25 +72,19 @@
 .popup-title {
   font-size: 64px;
   font-weight: 900;
-  color: #ffffff;
-  margin-bottom: 20px;
-  text-shadow: 
-    2px 2px 4px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(0, 213, 255, 0.5);
-  letter-spacing: 0.1em;
+  color: #3492f6;
+  margin-bottom: 10px;
   text-transform: uppercase;
-  animation: titleGlow 2s ease-in-out infinite alternate;
 }
 
 .prize-container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 40px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 10px;
   border-radius: 20px;
   margin: 30px 0;
   box-shadow: 
     inset 0 2px 8px rgba(0, 0, 0, 0.1),
     0 8px 25px rgba(0, 0, 0, 0.15);
-  border: 3px solid rgba(0, 85, 255, 0.3);
   animation: prizeReveal 0.6s ease-out 0.3s both;
 }
 

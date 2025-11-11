@@ -14,7 +14,7 @@ const DEFAULT_PRIZES = [
 ];
 
 const SpinWheelAlgoland = () => {
-  const [wheelSize] = useState(700); // Tamaño fijo para 1080x1920 vertical
+  const [wheelSize, setWheelSize] = useState(700); // tamaño base, se ajusta a viewport
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
@@ -118,7 +118,23 @@ useEffect(() => {
     };
   };
 
-  // Sin lógica responsive - diseño fijo para 1080x1920 vertical
+  // Responsivo mínimo para pantallas grandes en vertical (desktop/TV)
+  useEffect(() => {
+    const computeWheelSize = () => {
+      const minSide = Math.min(window.innerWidth, window.innerHeight);
+      // Ocupa ~82% del lado menor; limitar a un rango razonable para TV vertical
+      const target = Math.floor(minSide * 0.82);
+      const clamped = Math.max(560, Math.min(target, 960));
+      setWheelSize(clamped);
+    };
+    computeWheelSize();
+    window.addEventListener('resize', computeWheelSize);
+    window.addEventListener('orientationchange', computeWheelSize);
+    return () => {
+      window.removeEventListener('resize', computeWheelSize);
+      window.removeEventListener('orientationchange', computeWheelSize);
+    };
+  }, []);
 
   // Efecto para anuncios de accesibilidad
   useEffect(() => {
@@ -172,10 +188,8 @@ useEffect(() => {
       {/* Encabezado */}
       <div className="header">
         <h1 className="title-main">
-          <span className="title-line">WHEEL OF</span>
-          <span className="title-line accent">FORTUNE!</span>
+          <span className="title-line">SPIN THE WHEEL</span>
         </h1>
-        <div className="title-underline"></div>
       </div>
 
       {/* Contenedor de la ruleta */}
