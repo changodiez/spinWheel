@@ -101,6 +101,9 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       let currentFont = ctx.font;
       let metrics = ctx.measureText(prize);
       
+      // Verificar si es un premio QR
+      const isQR = prize.startsWith('QR');
+      
       // Ajustar tamaño de fuente si es necesario
       if (metrics.width > maxTextWidth) {
         const smallerFontSize = isQR ? "bold 14px" : "bold 12px";

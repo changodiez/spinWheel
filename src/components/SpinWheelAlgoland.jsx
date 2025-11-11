@@ -14,10 +14,9 @@ const DEFAULT_PRIZES = [
 ];
 
 const SpinWheelAlgoland = () => {
-  const [wheelSize, setWheelSize] = useState(400);
+  const [wheelSize] = useState(700); // Tamaño fijo para 1080x1920 vertical
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
-  const [isLandscape, setIsLandscape] = useState(false);
   const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -122,25 +121,7 @@ useEffect(() => {
     };
   };
 
-  // Detectar orientación
-  useEffect(() => {
-    const checkOrientation = () => {
-      const isLandscapeMode = window.innerWidth > window.innerHeight;
-      setIsLandscape(isLandscapeMode);
-      
-      const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.7;
-      setWheelSize(Math.max(350, maxSize));
-    };
-    
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-    
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
-  }, []);
+  // Sin lógica responsive - diseño fijo para 1080x1920 vertical
 
   // Efecto para anuncios de accesibilidad
   useEffect(() => {
@@ -177,7 +158,7 @@ useEffect(() => {
 
   return (
     <div 
-      className={`spin-wheel-container forced-portrait ${isLandscape ? 'landscape-warning' : ''} ${!cursorVisible ? 'no-cursor' : ''}`} // ✅ Clase condicional
+      className={`spin-wheel-container ${!cursorVisible ? 'no-cursor' : ''}`} // ✅ Clase condicional
       style={{ cursor: cursorVisible ? 'default' : 'none' }} // ✅ Estilo inline para el cursor
     >
       
@@ -240,7 +221,7 @@ useEffect(() => {
           {spinning ? (
             <>
               <span className="spinning-icon">🌀</span>
-              SPINING...
+              SPINNING...
             </>
           ) : (
             <>

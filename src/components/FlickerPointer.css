@@ -135,13 +135,4 @@
     }
   }
   
-  /* RESPONSIVE - AHORA MENOS NECESARIO PERO MANTENEMOS PARA MÓVIL */
-  @media (max-width: 768px) {
-    .pointer-base {
-      border-width: 2px; /* Borde más delgado en móvil */
-    }
-    
-    .base-glow {
-      filter: blur(8px); /* Menos blur en móvil */
-    }
-  }
+  /* Sin responsive - diseño fijo para 1080x1920 */
