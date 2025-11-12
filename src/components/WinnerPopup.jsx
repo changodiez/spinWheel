@@ -60,11 +60,8 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
     }, 400);
   };
 
-  const handlePopupClick = (e) => e.stopPropagation();
-
   if (!winner) return null;
 
-  // OBTENER SRC (evita renderizar el objeto)
   const entry = PRIZE_IMAGES[winner.prize];
   const prizeSrc = typeof entry === 'string' ? entry : entry?.src;
 
@@ -78,7 +75,7 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
       aria-modal="true"
       onClick={handleClose}
     >
-      <div className="winner-popup-content" onClick={handlePopupClick}>
+      <div className="winner-popup-content" onClick={handleClose}>
         <div className="popup-inner">
           <h1 id="winner-title" className="popup-title">YOU WIN</h1>
 
@@ -92,7 +89,7 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
                   draggable="false"
                 />
               ) : (
-                <span role="img" aria-label="gift">🎁</span>
+                <span role="img" aria-label="gift">?</span>
               )}
             </div>
           </div>

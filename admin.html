@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Ruleta de Premios</title>
     <style>
+        @font-face {
+            font-family: 'Minecrafter';
+            src: url('/src/assets/font/Minecrafter.Reg.ttf') format('truetype');
+            font-display: swap;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,21 +18,44 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3a8a, #581c87);
-            color: white;
+            font-family: 'Minecrafter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: 
+                linear-gradient(180deg, rgba(5, 3, 33, 0.95) 0%, rgba(8, 5, 45, 0.9) 45%, rgba(23, 8, 80, 0.85) 70%, rgba(32, 9, 110, 0.95) 100%),
+                radial-gradient(circle at 50% 30%, rgba(255, 0, 170, 0.3), transparent 50%);
+            color: #ffffff;
             min-height: 100vh;
             padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Grid pattern de fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 0, 170, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 238, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
         }
         
         .admin-container {
             max-width: 640px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
             padding: 2rem;
-            border: 2px solid rgba(251, 191, 36, 0.5);
+            border: 2px solid rgba(14, 230, 230, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
         }
         
         .header {
@@ -35,24 +64,28 @@
         }
         
         .header h1 {
-            color: #fbbf24;
+            font-family: 'Minecrafter', monospace;
+            color: #0ee6e6;
             margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            letter-spacing: 0.1em;
         }
         
         .connection-status {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(14, 230, 230, 0.3);
         }
         
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #ef4444;
         }
@@ -62,16 +95,19 @@
         }
         
         .section {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.4);
             padding: 1.5rem;
-            border-radius: 15px;
+            border-radius: 16px;
             margin-bottom: 1.5rem;
+            border: 2px solid rgba(14, 230, 230, 0.3);
         }
         
         .section h2 {
-            color: #fbbf24;
+            font-family: 'Minecrafter', monospace;
+            color: #0ee6e6;
             margin-bottom: 1rem;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            letter-spacing: 0.05em;
         }
         
         .add-prize {
@@ -83,22 +119,46 @@
         .add-prize input {
             flex: 1;
             padding: 0.9rem;
-            border: none;
+            border: 2px solid rgba(14, 230, 230, 0.3);
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            font-family: 'Minecrafter', monospace;
+            font-size: 0.9rem;
             min-height: 48px;
+            transition: all 0.3s ease;
+        }
+
+        .add-prize input:focus {
+            outline: none;
+            border-color: #0ee6e6;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .add-prize input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
         
         .add-prize button {
             padding: 0.9rem 1.5rem;
-            background: #10b981;
-            border: none;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: 2px solid #10b981;
             border-radius: 10px;
             color: white;
+            font-family: 'Minecrafter', monospace;
             font-weight: bold;
             cursor: pointer;
             min-height: 48px;
+            transition: all 0.3s ease;
+        }
+
+        .add-prize button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+        }
+
+        .add-prize button:active:not(:disabled) {
+            transform: translateY(0);
         }
         
         .prizes-list {
@@ -108,46 +168,96 @@
             max-height: 50vh;
             overflow-y: auto;
         }
+
+        .prizes-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .prizes-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .prizes-list::-webkit-scrollbar-thumb {
+            background: rgba(14, 230, 230, 0.5);
+            border-radius: 4px;
+        }
+
+        .prizes-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(14, 230, 230, 0.7);
+        }
         
         .prize-item {
             display: flex;
             align-items: center;
             gap: 1rem;
             padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(14, 230, 230, 0.1);
+            border-radius: 12px;
+            border: 2px solid rgba(14, 230, 230, 0.3);
+            transition: all 0.3s ease;
+            cursor: move;
+            user-select: none;
+        }
+
+        .prize-item:hover {
+            background: rgba(14, 230, 230, 0.15);
+            border-color: rgba(14, 230, 230, 0.5);
+        }
+
+        .prize-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .prize-item.drag-over {
+            border-color: #0ee6e6;
+            background: rgba(14, 230, 230, 0.25);
         }
         
         .prize-number {
-            background: #fbbf24;
-            color: #1e293b;
-            width: 30px;
-            height: 30px;
+            background: linear-gradient(135deg, #0ee6e6, #04b1ff);
+            color: #000000;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: 1rem;
         }
         
         .prize-name {
             flex: 1;
-            font-size: 1.1rem;
+            font-family: 'Minecrafter', monospace;
+            font-size: 1rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #ffffff;
         }
         
         .delete-btn {
-            background: #ef4444;
-            border: none;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: 2px solid #ef4444;
             color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .delete-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: scale(1.1);
+        }
+
+        .delete-btn:active:not(:disabled) {
+            transform: scale(0.95);
         }
         
         .action-buttons {
@@ -158,36 +268,76 @@
         .action-btn {
             flex: 1;
             padding: 1rem;
-            border: none;
-            border-radius: 10px;
+            border: 3px solid;
+            border-radius: 12px;
             color: white;
+            font-family: 'Minecrafter', monospace;
             font-weight: bold;
             cursor: pointer;
             font-size: 1rem;
             min-height: 52px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .spin-btn {
-            background: #f59e0b;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #f59e0b;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+        }
+
+        .spin-btn:active:not(:disabled) {
+            transform: translateY(0);
         }
         
         .save-btn {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #3b82f6;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+        }
+
+        .save-btn:active:not(:disabled) {
+            transform: translateY(0);
         }
         
         .info {
             text-align: center;
             margin-top: 2rem;
             padding: 1rem;
-            background: rgba(251, 191, 36, 0.1);
-            border-radius: 10px;
-            border: 1px solid #fbbf24;
+            background: rgba(14, 230, 230, 0.1);
+            border-radius: 12px;
+            border: 2px solid rgba(14, 230, 230, 0.3);
         }
+
+        .info p {
+            font-family: 'Minecrafter', monospace;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+        }
+
+        .info strong {
+            color: #0ee6e6;
+        }
+
 
         @media (max-width: 768px) {
             .admin-container {
-                padding: 1rem;
-                border-radius: 16px;
+                padding: 1.5rem;
+                border-radius: 20px;
             }
             
             .add-prize {
@@ -200,7 +350,11 @@
             }
             
             .prize-name {
-                font-size: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
             }
         }
     </style>
@@ -215,6 +369,12 @@
             </div>
         </div>
 
+
+
+        <div class="section">
+            <h2>🎯 Premios Actuales (<span id="prizesCount">0</span>)</h2>
+            <div class="prizes-list" id="prizesList"></div>
+        </div>
         <div class="section">
             <h2>➕ Agregar Premio</h2>
             <div class="add-prize">
@@ -222,12 +382,6 @@
                 <button onclick="addPrize()">Agregar</button>
             </div>
         </div>
-
-        <div class="section">
-            <h2>🎯 Premios Actuales (<span id="prizesCount">0</span>)</h2>
-            <div class="prizes-list" id="prizesList"></div>
-        </div>
-
         <div class="action-buttons">
             <button id="spinBtn" class="action-btn spin-btn" onclick="spinWheel()">🎡 Girar Ruleta</button>
             <button id="saveBtn" class="action-btn save-btn" onclick="savePrizes()">💾 Guardar</button>
@@ -352,7 +506,6 @@
         }
         
         function savePrizes() {
-            // Guardado vía API REST del servidor
             fetch('/api/prizes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -369,6 +522,8 @@
             });
         }
         
+        let draggedIndex = null;
+
         function renderPrizes() {
             const list = document.getElementById('prizesList');
             const count = document.getElementById('prizesCount');
@@ -384,13 +539,98 @@
             prizes.forEach((prize, index) => {
                 const item = document.createElement('div');
                 item.className = 'prize-item';
+                item.draggable = true;
+                item.dataset.index = index;
                 item.innerHTML = `
                     <div class="prize-number">${index + 1}</div>
                     <div class="prize-name">${prize}</div>
-                    <button class="delete-btn" onclick="removePrize(${index})">🗑️</button>
+                    <button class="delete-btn" onclick="removePrize(${index})" onmousedown="event.stopPropagation()">🗑️</button>
                 `;
+                
+                // Event listeners para drag and drop
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+                
                 list.appendChild(item);
             });
+        }
+
+        function handleDragStart(e) {
+            // Asegurarse de que el drag se inicie desde el item, no desde el botón
+            const item = e.target.closest('.prize-item');
+            if (!item) return;
+            
+            draggedIndex = parseInt(item.dataset.index);
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedIndex.toString());
+            
+            // Prevenir que el botón interfiera
+            if (e.target.classList.contains('delete-btn')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+
+        function handleDragEnd(e) {
+            const item = e.target.closest('.prize-item');
+            if (item) {
+                item.classList.remove('dragging');
+            }
+            // Limpiar clases de drag-over de todos los items
+            document.querySelectorAll('.prize-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+            draggedIndex = null;
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            const targetIndex = parseInt(e.currentTarget.dataset.index);
+            if (targetIndex !== draggedIndex) {
+                e.currentTarget.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            const targetIndex = parseInt(e.currentTarget.dataset.index);
+            
+            if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                // Reordenar array
+                const newPrizes = [...prizes];
+                const [removed] = newPrizes.splice(draggedIndex, 1);
+                newPrizes.splice(targetIndex, 0, removed);
+                
+                // Actualizar y enviar al servidor
+                prizes = newPrizes;
+                sendMessage({
+                    type: 'update_prizes',
+                    prizes: newPrizes
+                });
+                renderPrizes();
+            }
+            
+            e.currentTarget.classList.remove('drag-over');
+            return false;
         }
         
         document.getElementById('newPrizeInput').addEventListener('keypress', (e) => {

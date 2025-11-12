@@ -19,11 +19,10 @@ const SpinWheelAlgoland = () => {
   const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [cursorVisible, setCursorVisible] = useState(true); // ✅ Nuevo estado para el cursor
+  const [cursorVisible, setCursorVisible] = useState(true);
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(prizes);
 
-  // ✅ Detectar tecla "C" para ocultar/mostrar cursor
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'c' || e.key === 'C') {
@@ -37,30 +36,22 @@ const SpinWheelAlgoland = () => {
     };
   }, []);
 
-  // ✅ Click en cualquier parte de la pantalla para girar
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      if (!spinning && 
+          prizes.length > 0 &&
+          !e.target.closest('.winner-popup-overlay')) {
+        startSpin();
+      }
+    };
 
-useEffect(() => {
-  const handleGlobalClick = (e) => {
-    // No girar si:
-    // - Ya está girando
-    // - No hay premios
-    // - El click fue en el botón de spin 
-    // - El click fue dentro de un popup
-    if (!spinning && 
-        prizes.length > 0 &&
-        !e.target.closest('.winner-popup-overlay')) {
-      startSpin();
-    }
-  };
+    document.addEventListener('click', handleGlobalClick);
 
-  document.addEventListener('click', handleGlobalClick);
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, [spinning, prizes.length, startSpin]); 
 
-  return () => {
-    document.removeEventListener('click', handleGlobalClick);
-  };
-}, [spinning, prizes.length, startSpin]); 
-
-  // Detectar si estamos en GitHub Pages (demo) o local (completo)
   useEffect(() => {
     const isGitHubPages = window.location.hostname.includes('github.io');
     setIsDemoMode(isGitHubPages);
@@ -70,12 +61,10 @@ useEffect(() => {
       setPrizes(DEFAULT_PRIZES);
     } else {
       setConnectionStatus('Conectando al servidor...');
-      // Solo conectar WebSocket si NO estamos en GitHub Pages
       connectToWebSocket();
     }
   }, []);
 
-  // WebSocket connection solo para local
   const connectToWebSocket = () => {
     const ws = new WebSocket('ws://localhost:3000');
     
@@ -105,7 +94,6 @@ useEffect(() => {
     
     ws.onclose = () => {
       if (!isDemoMode) {
-        // Si se desconecta, usar premios por defecto
         setPrizes(DEFAULT_PRIZES);
       }
     };
@@ -117,11 +105,9 @@ useEffect(() => {
     };
   };
 
-  // Responsivo mínimo para pantallas grandes en vertical (desktop/TV)
   useEffect(() => {
     const computeWheelSize = () => {
       const minSide = Math.min(window.innerWidth, window.innerHeight);
-      // Ocupa ~82% del lado menor; limitar a un rango razonable para TV vertical
       const target = Math.floor(minSide * 0.82);
       const clamped = Math.max(560, Math.min(target, 960));
       setWheelSize(clamped);
@@ -135,7 +121,6 @@ useEffect(() => {
     };
   }, []);
 
-  // Efecto para anuncios de accesibilidad
   useEffect(() => {
     if (spinning) {
       setAnnouncement('La rueda está girando');
@@ -184,8 +169,6 @@ useEffect(() => {
       <div className="bg-overlay"></div>
 
       <div className="spin-wheel-container">
-
-        {/* Anuncios de accesibilidad */}
         <div
           className="sr-only"
           aria-live="polite"
@@ -194,15 +177,13 @@ useEffect(() => {
           {announcement}
         </div>
 
-        {/* Encabezado */}
         <div className="header">
           <h1 className="title-main">
           <img src={headerImg} alt="Header" className="header-img" />
           </h1>
         </div>
 
-        {/* Contenedor de la ruleta */}
-        <div className="wheel-container">
+        <div className={`wheel-container ${showWinner ? 'hidden' : ''}`}>
           <WheelCanvas
             angle={angle}
             prizes={prizes}
@@ -218,7 +199,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* Botón de girar */}
         <button
           onClick={handleSpin}
           onTouchStart={handleTouchStart}
@@ -231,7 +211,6 @@ useEffect(() => {
           </span>
         </button>
 
-        {/* Popup de ganador */}
         <WinnerPopup
           winner={showWinner ? winner : null}
           onClose={handleCloseWinner}

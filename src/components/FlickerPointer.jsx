@@ -4,32 +4,48 @@ import './FlickerPointer.css';
 
 const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   const [bend, setBend] = useState(0);
-  const lastAngleRef = useRef(0);
+  const lastAngleRef = useRef(null);
   const velocityRef = useRef(0);
-  const lastSliceRef = useRef(0);
+  const lastSliceRef = useRef(null);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     if (prizes.length === 0) return;
 
     const sliceAngle = (Math.PI * 2) / prizes.length;
+    // Normalizar ángulo a rango [0, 2π)
     const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     
-    // Calcular el índice del premio actual
-    const currentSlice = Math.floor(normalizedAngle / sliceAngle);
+    // El pointer está fijo en la parte superior (3π/2)
+    // La rueda se rota con angle
+    // Para calcular qué segmento está bajo el pointer: relativeAngle = (3π/2 - normalizedAngle) % (2π)
+    const pointerAngle = Math.PI * 1.5; // 3π/2
+    const relativeAngle = ((pointerAngle - normalizedAngle) + Math.PI * 2) % (Math.PI * 2);
+    const currentSlice = Math.floor(relativeAngle / sliceAngle) % prizes.length;
+    
+    // Inicializar en el primer render
+    if (!isInitializedRef.current || lastSliceRef.current === null || lastAngleRef.current === null) {
+      lastSliceRef.current = currentSlice;
+      lastAngleRef.current = normalizedAngle;
+      isInitializedRef.current = true;
+      return;
+    }
     
     // Detectar cuando cruza un borde de premio
     if (currentSlice !== lastSliceRef.current) {
-      // Calcular la dirección del movimiento
-      const angleDiff = normalizedAngle - lastAngleRef.current;
+      // Calcular la diferencia de ángulo normalizada
+      // Manejar el wrap-around correctamente
+      let angleDiff = normalizedAngle - lastAngleRef.current;
       
-      // Normalizar la diferencia de ángulo para detectar correctamente la dirección
-      let normalizedDiff = angleDiff;
-      if (Math.abs(angleDiff) > Math.PI) {
-        normalizedDiff = angleDiff - (Math.PI * 2 * Math.sign(angleDiff));
+      // Normalizar la diferencia para manejar el wrap-around
+      if (angleDiff > Math.PI) {
+        angleDiff -= Math.PI * 2;
+      } else if (angleDiff < -Math.PI) {
+        angleDiff += Math.PI * 2;
       }
       
       // La dirección determina hacia qué lado debe doblarse el pointer
-      const direction = Math.sign(normalizedDiff);
+      const direction = Math.sign(angleDiff);
       
       // Calcular intensidad basada en la velocidad
       const intensity = Math.min(Math.abs(velocity) * 0.8, CONFIG.POINTER.BEND_INTENSITY);
@@ -37,8 +53,6 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
       // Aplicar el bend en la dirección opuesta al movimiento
       setBend(-direction * intensity);
       velocityRef.current = -direction * intensity;
-      
-      console.log(`Cruzó borde: slice ${lastSliceRef.current} -> ${currentSlice}, dirección: ${direction}, intensidad: ${intensity}`);
     }
     
     lastAngleRef.current = normalizedAngle;

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSoundEffects } from './useSoundEffects';
-import { calculateWinnerIndex } from '../utils/wheelCalculations';
+import { calculateWinnerIndex, applyWeightedSelectionWithAngle } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
 
 export const useWheelAnimation = (prizes) => {
@@ -14,12 +14,9 @@ export const useWheelAnimation = (prizes) => {
   const lastTickAngleRef = useRef(0);
   const lastSliceRef = useRef(0);
   
-  // Asegurarnos de que el hook de sonido se inicialice correctamente
   const { playTick, playWin, initializeAudio } = useSoundEffects();
 
-  // Inicializar audio cuando el componente se monta
   useEffect(() => {
-    // Forzar la inicialización del audio en una interacción del usuario
     const handleFirstInteraction = () => {
       initializeAudio();
       window.removeEventListener('click', handleFirstInteraction);
@@ -51,6 +48,13 @@ export const useWheelAnimation = (prizes) => {
 
     if (!lastTimeRef.current) {
       lastTimeRef.current = time;
+      if (prizes.length > 0) {
+        const sliceAngle = (Math.PI * 2) / prizes.length;
+        const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        const pointerAngle = Math.PI * 1.5; // 3π/2
+        const relativeAngle = ((pointerAngle - normalizedAngle) + Math.PI * 2) % (Math.PI * 2);
+        lastSliceRef.current = Math.floor(relativeAngle / sliceAngle) % prizes.length;
+      }
       requestRef.current = requestAnimationFrame(animate);
       return;
     }
@@ -61,15 +65,15 @@ export const useWheelAnimation = (prizes) => {
     const newAngle = angle - velocity * deltaTime;
     const newVelocity = velocity * (1 - deltaTime * CONFIG.PHYSICS.FRICTION);
 
-    // ✅ DETECCIÓN MEJORADA DE CRUCE DE PREMIOS
     if (prizes.length > 0) {
       const sliceAngle = (Math.PI * 2) / prizes.length;
       const normalizedAngle = ((newAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      const currentSlice = Math.floor(normalizedAngle / sliceAngle);
+      const pointerAngle = Math.PI * 1.5;
+      const relativeAngle = ((pointerAngle - normalizedAngle) + Math.PI * 2) % (Math.PI * 2);
+      const currentSlice = Math.floor(relativeAngle / sliceAngle) % prizes.length;
       
-      // Solo reproducir sonido cuando realmente cambia de premio
       if (currentSlice !== lastSliceRef.current) {
-        playTick(Math.abs(velocity)); // Pasar velocidad para sonido dinámico
+        playTick(Math.abs(velocity));
         lastSliceRef.current = currentSlice;
       }
     }
@@ -77,19 +81,27 @@ export const useWheelAnimation = (prizes) => {
     setAngle(newAngle);
     setVelocity(newVelocity);
 
-    // Detener cuando la velocidad es baja
     if (Math.abs(newVelocity) < CONFIG.PHYSICS.STOP_THRESHOLD) {
       setSpinning(false);
       
-      const winnerIndex = calculateWinnerIndex(newAngle, prizes);
+      const result = applyWeightedSelectionWithAngle(newAngle, prizes);
+      
+      if (Math.abs(result.finalAngle - newAngle) > 0.01) {
+        let angleDiff = result.finalAngle - newAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        setAngle(newAngle + angleDiff);
+      } else {
+        setAngle(result.finalAngle);
+      }
+      
       const winnerData = {
-        prize: prizes[winnerIndex],
-        index: winnerIndex
+        prize: prizes[result.index],
+        index: result.index
       };
       
       setWinner(winnerData);
       
-      // Pequeño delay antes del sonido de victoria
       setTimeout(() => {
         playWin();
       }, 300);
@@ -115,13 +127,18 @@ export const useWheelAnimation = (prizes) => {
   const startSpin = useCallback(() => {
     if (spinning) return;
     
-    // Asegurar que el audio esté inicializado antes de girar
     initializeAudio();
-    
     stopAnimation();
     
-    // ✅ RESETEAR LAS REFERENCIAS AL COMENZAR NUEVO GIRO
-    lastSliceRef.current = 0;
+    if (prizes.length > 0) {
+      const sliceAngle = (Math.PI * 2) / prizes.length;
+      const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const pointerAngle = Math.PI * 1.5;
+      const relativeAngle = ((pointerAngle - normalizedAngle) + Math.PI * 2) % (Math.PI * 2);
+      lastSliceRef.current = Math.floor(relativeAngle / sliceAngle) % prizes.length;
+    } else {
+      lastSliceRef.current = 0;
+    }
     lastTickAngleRef.current = angle;
     
     setWinner(null);
@@ -132,7 +149,7 @@ export const useWheelAnimation = (prizes) => {
     
     setVelocity(randomVelocity);
     setSpinning(true);
-  }, [spinning, angle, stopAnimation, initializeAudio]);
+  }, [spinning, angle, stopAnimation, initializeAudio, prizes.length]);
 
   return { 
     angle, 
