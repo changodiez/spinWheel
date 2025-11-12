@@ -1,36 +1,30 @@
-
-// MAPEO CUANDO TENGA LAS IMAGENES 
-/*
-const PRIZE_IMAGES = {
-  "Tote Bag": { type: "image", src: "/images/premios/tote-bag.jpg" },
-  "Camiseta": { type: "image", src: "/images/premios/camiseta.jpg" }, 
-  "QR1": { type: "emoji", src: "📱" },
-  "Gorra": { type: "image", src: "/images/premios/gorra.jpg" },
-  "Mug": { type: "image", src: "/images/premios/mug.jpg" },
-  "QR2": { type: "emoji", src: "📱" },
-  "Pin": { type: "image", src: "/images/premios/pin.jpg" },
-  "Patch": { type: "image", src: "/images/premios/patch.jpg" },
-  "QR3": { type: "emoji", src: "📱" },
-  "Luggage Tag": { type: "image", src: "/images/premios/luggage-tag.jpg" },
-  "Calcetín": { type: "image", src: "/images/premios/calcetin.jpg" }
-};
-*/
 import React, { useEffect, useRef, useState } from 'react';
 import './WinnerPopup.css';
 
-// Mapeo de emojis para premios
-const PRIZE_IMAGES = {
-  "Tote Bag": "🎒",
-  "Camiseta": "👕", 
-  "QR1": "📱",
-  "Gorra": "🧢",
-  "Mug": "☕",
-  "QR2": "📱",
-  "Pin": "📌",
-  "Patch": "🧵",
-  "QR3": "📱",
-  "Luggage Tag": "🏷️",
-  "Calcetín": "🧦"
+import ToteIcon from '../assets/img/Tote@2x.png';
+import CamisetaIcon from '../assets/img/Camiseta@2x.png';
+import GorraIcon from '../assets/img/Gorra@2x.png';
+import MugIcon from '../assets/img/Taza@2x.png';
+import PinIcon from '../assets/img/Pin@2x.png';
+import PatchIcon from '../assets/img/Pegatina@2x.png';
+import CalcetinIcon from '../assets/img/Calcetin@2x.png';
+import LuggageIcon from '../assets/img/Maleta@2x.png';
+import QRWalletIcon from '../assets/img/PeraWallet@2x.png';
+import TatooIcon from '../assets/img/Tattoo@2x.png';
+import LanyardIcon from '../assets/img/Lanyard@2x.png';
+
+const PRIZE_IMAGES  = {
+  'Tote':        { type: "image", src: ToteIcon },
+  'T-Shirt':     { type: "image", src: CamisetaIcon },
+  'Cool Cap':    { type: "image", src: GorraIcon },
+  'Mug':         { type: "image", src: MugIcon },
+  'Pin':         { type: "image", src: PinIcon },
+  'Sticker':     { type: "image", src: PatchIcon },
+  'Socks':       { type: "image", src: CalcetinIcon },
+  'Label':       { type: "image", src: LuggageIcon },
+  'Tattoo':      { type: "image", src: TatooIcon },
+  'PeraWallet':  { type: "image", src: QRWalletIcon },
+  'Lanyard':     { type: "image", src: LanyardIcon },
 };
 
 const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
@@ -40,69 +34,42 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    if (winner) {
-      // Tecla "W" para prevenir cierre (modo desarrollo)
-      const handleKeyPress = (e) => {
-        if (e.key === 'w' || e.key === 'W') {
-          setPreventClose(prev => !prev);
-        }
-      };
+    if (!winner) return;
 
-      window.addEventListener('keydown', handleKeyPress);
+    const handleKeyPress = (e) => {
+      if (e.key === 'w' || e.key === 'W') setPreventClose(prev => !prev);
+    };
+    window.addEventListener('keydown', handleKeyPress);
 
-      // Timer de cierre automático
-      if (!preventClose) {
-        timerRef.current = setTimeout(() => {
-          handleClose();
-        }, autoCloseTime);
-      }
-
-      // Click en cualquier lugar para cerrar
-      const handleClickAnywhere = () => {
-        if (!preventClose) {
-          handleClose();
-        }
-      };
-
-      // Delay para evitar cierre inmediato
-      const clickTimeout = setTimeout(() => {
-        if (!preventClose) {
-          document.addEventListener('click', handleClickAnywhere);
-        }
-      }, 500);
-
-      // Cleanup
-      return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        clearTimeout(clickTimeout);
-        document.removeEventListener('click', handleClickAnywhere);
-        window.removeEventListener('keydown', handleKeyPress);
-      };
+    if (!preventClose) {
+      timerRef.current = setTimeout(() => handleClose(), autoCloseTime);
     }
-  }, [winner, onClose, autoCloseTime, preventClose]);
 
-  // Manejar cierre con animación
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [winner, autoCloseTime, preventClose]);
+
   const handleClose = () => {
-    if (!preventClose && !isClosing) {
-      setIsClosing(true);
-      setTimeout(() => {
-        onClose();
-        setIsClosing(false);
-      }, 400);
-    }
+    if (preventClose || isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 400);
   };
 
-  // Prevenir cierre al hacer click dentro del popup
-  const handlePopupClick = (e) => {
-    e.stopPropagation();
-  };
+  const handlePopupClick = (e) => e.stopPropagation();
 
   if (!winner) return null;
 
-  const prizeImage = PRIZE_IMAGES[winner.prize] || "🎁";
+  // OBTENER SRC (evita renderizar el objeto)
+  const entry = PRIZE_IMAGES[winner.prize];
+  const prizeSrc = typeof entry === 'string' ? entry : entry?.src;
 
   return (
-    <div 
+    <div
       ref={dialogRef}
       className={`winner-popup-overlay ${isClosing ? 'closing' : ''}`}
       role="dialog"
@@ -111,18 +78,25 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
       aria-modal="true"
       onClick={handleClose}
     >
-      <div 
-        className="winner-popup-content"
-        onClick={handleClose}
-      >
+      <div className="winner-popup-content" onClick={handlePopupClick}>
         <div className="popup-inner">
-          <div className="celebration-icon">🎉</div>
           <h1 id="winner-title" className="popup-title">YOU WIN!</h1>
+
           <div className="prize-image-container">
             <div className="prize-image" role="img" aria-label={winner.prize}>
-              {prizeImage}
+              {prizeSrc ? (
+                <img
+                  src={prizeSrc}
+                  alt={winner.prize}
+                  className="winner-icon"
+                  draggable="false"
+                />
+              ) : (
+                <span role="img" aria-label="gift">🎁</span>
+              )}
             </div>
           </div>
+
           <div className="prize-container">
             <p className="prize-name">{winner.prize}</p>
           </div>

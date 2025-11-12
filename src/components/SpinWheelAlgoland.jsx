@@ -9,8 +9,7 @@ import './SpinWheelAlgoland.css';
 
 // Premios fijos para GitHub Pages
 const DEFAULT_PRIZES = [
-  "Tote Bag", "Camiseta", "QR1", "Gorra", "Mug", 
-  "QR2", "Pin", "Patch", "QR3", "Luggage Tag", "Calcetín"
+  "Tote", "Sticker", "Cool Cap", "Tattoo", "Socks", "T-Shirt", "Mug", "Label", "PeraWallet", "Pin", "Lanyard"
 ];
 
 const SpinWheelAlgoland = () => {

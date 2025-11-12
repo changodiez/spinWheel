@@ -18,18 +18,16 @@ import centerWheel from '../assets/img/centerWheel.png';
 
 
 const ICON_SOURCES = {
-  'Tote Bag': ToteIcon,
-  Camiseta: CamisetaIcon,
-  Gorra: GorraIcon,
+  'Tote': ToteIcon,
+  'T-Shirt': CamisetaIcon,
+  'Cool Cap': GorraIcon,
   Mug: MugIcon,
   Pin: PinIcon,
-  Patch: PatchIcon,
-  'Calcetín': CalcetinIcon,
-  'Luggage Tag': LuggageIcon,
+  Sticker: PatchIcon,
+  'Socks': CalcetinIcon,
+  Label: LuggageIcon,
   Tattoo: TatooIcon,
-  QR1: QRWalletIcon,
-  QR2: QRWalletIcon,
-  QR3: QRWalletIcon,
+  PeraWallet: QRWalletIcon,
   Lanyard: LanyardIcon,
 };
 
