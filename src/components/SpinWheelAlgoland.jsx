@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWheelAnimation } from '../hooks/useWheelAnimation';
-import { CONFIG } from '../constants/config';
-import { getResponsiveSize } from '../utils/wheelCalculations';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
+import backgroundVideo from '../assets/background/Spin_Video_BG.mp4';
+import headerImg from '../assets/img/header.png'
 import './SpinWheelAlgoland.css';
 
 // Premios fijos para GitHub Pages
@@ -170,78 +170,75 @@ useEffect(() => {
   }, [spinning, handleSpin]);
 
   return (
-    <div 
-      className={`spin-wheel-container ${!cursorVisible ? 'no-cursor' : ''}`} // ✅ Clase condicional
-      style={{ cursor: cursorVisible ? 'default' : 'none' }} // ✅ Estilo inline para el cursor
+    <div
+      className={`spin-wheel-stage ${!cursorVisible ? 'no-cursor' : ''}`}
+      style={{ cursor: cursorVisible ? 'default' : 'none' }}
     >
-
-
-      {/* Anuncios de accesibilidad */}
-      <div 
-        className="sr-only" 
-        aria-live="polite" 
-        aria-atomic="true"
-      >
-        {announcement}
-      </div>
-
-      {/* Encabezado */}
-      <div className="header">
-        <h1 className="title-main">
-          <span className="title-line">SPIN THE WHEEL</span>
-        </h1>
-      </div>
-
-      {/* Contenedor de la ruleta */}
-      <div className="wheel-container">
-        <WheelCanvas 
-          angle={angle} 
-          prizes={prizes}
-          winnerIndex={winner?.index}
-          size={wheelSize}
-        />
-        
-        <FlickerPointer 
-          angle={angle} 
-          prizes={prizes}
-          wheelSize={wheelSize}
-          velocity={velocity}
-        />
-      </div>
-
-      {/* Botón de girar */}
-      <button
-        onClick={handleSpin}
-        onTouchStart={handleTouchStart}
-        disabled={spinning || prizes.length === 0}
-        aria-label={spinning ? "Girando la ruleta" : "Girar la ruleta"}
-        className={`spin-button tv-button ${spinning ? 'spinning' : ''}`}
-      >
-        <span className="button-text">
-          {spinning ? (
-            <>
-              <span className="spinning-icon">🌀</span>
-              SPINNING...
-            </>
-          ) : (
-            <>
-              SPIN THE WHEEL!
-            </>
-          )}
-        </span>
-        <div className="button-glow"></div>
-      </button>
-
-      {/* Popup de ganador */}
-      <WinnerPopup 
-        winner={showWinner ? winner : null} 
-        onClose={handleCloseWinner}
-        autoCloseTime={isDemoMode ? 8000 : 15000}
+      <video
+        className="bg-video"
+        src={backgroundVideo}
+        autoPlay
+        muted
+        loop
+        playsInline
       />
+      <div className="bg-overlay"></div>
 
-      {/* Efectos de borde */}
-      <div className="border-effect top"></div>
-      <div className="border-effect bottom"></div>
+      <div className="spin-wheel-container">
+
+        {/* Anuncios de accesibilidad */}
+        <div
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {announcement}
+        </div>
+
+        {/* Encabezado */}
+        <div className="header">
+          <h1 className="title-main">
+          <img src={headerImg} alt="Header" className="header-img" />
+          </h1>
+        </div>
+
+        {/* Contenedor de la ruleta */}
+        <div className="wheel-container">
+          <WheelCanvas
+            angle={angle}
+            prizes={prizes}
+            winnerIndex={winner?.index}
+            size={wheelSize}
+          />
+
+          <FlickerPointer
+            angle={angle}
+            prizes={prizes}
+            wheelSize={wheelSize}
+            velocity={velocity}
+          />
+        </div>
+
+        {/* Botón de girar */}
+        <button
+          onClick={handleSpin}
+          onTouchStart={handleTouchStart}
+          disabled={spinning || prizes.length === 0}
+          aria-label={spinning ? 'Girando la ruleta' : 'Girar la ruleta'}
+          className={`spin-button tv-button ${spinning ? 'spinning' : ''}`}
+        >
+          <span className="button-text">
+            {spinning ? 'SPINNING…' : 'SPIN NOW'}
+          </span>
+        </button>
+
+        {/* Popup de ganador */}
+        <WinnerPopup
+          winner={showWinner ? winner : null}
+          onClose={handleCloseWinner}
+          autoCloseTime={isDemoMode ? 8000 : 15000}
+        />
+      </div>
     </div>
   );
 };

@@ -1,9 +1,60 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useRef, useEffect, memo, useState } from 'react';
 import { generateColor } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
+import ToteIcon from '../assets/img/Tote@2x.png';
+import CamisetaIcon from '../assets/img/Camiseta@2x.png';
+import GorraIcon from '../assets/img/Gorra@2x.png';
+import MugIcon from '../assets/img/Taza@2x.png';
+import PinIcon from '../assets/img/Pin@2x.png';
+import PatchIcon from '../assets/img/Pegatina@2x.png';
+import CalcetinIcon from '../assets/img/Calcetin@2x.png';
+import LuggageIcon from '../assets/img/Maleta@2x.png';
+import QRWalletIcon from '../assets/img/PeraWallet@2x.png';
+import QRExtraIcon from '../assets/img/Tattoo@2x.png';
+import LanyardIcon from '../assets/img/Lanyard@2x.png';
+
+import centerWheel from '../assets/img/centerWheel.png';
+
+const ICON_SOURCES = {
+  'Tote Bag': ToteIcon,
+  Camiseta: CamisetaIcon,
+  Gorra: GorraIcon,
+  Mug: MugIcon,
+  Pin: PinIcon,
+  Patch: PatchIcon,
+  'Calcetín': CalcetinIcon,
+  'Luggage Tag': LuggageIcon,
+  QR1: QRWalletIcon,
+  QR2: QRWalletIcon,
+  QR3: QRWalletIcon,
+  Lanyard: LanyardIcon,
+};
 
 const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
   const canvasRef = useRef(null);
+  const [iconImages, setIconImages] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+    const entries = Object.entries(ICON_SOURCES);
+
+    Promise.all(
+      entries.map(([key, src]) => new Promise(resolve => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve([key, img]);
+        img.onerror = () => resolve([key, null]);
+      }))
+    ).then(results => {
+      if (isMounted) {
+        setIconImages(Object.fromEntries(results));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,14 +77,30 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
     // Limpiar canvas
     ctx.clearRect(0, 0, size, size);
 
-    // Dibujar fondo de la rueda
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + 2, 0, Math.PI * 2);
-    ctx.fillStyle = CONFIG.WHEEL.COLORS.BASE;
-    ctx.fill();
-
     ctx.save();
     ctx.translate(centerX, centerY);
+
+    const outerRadius = radius + CONFIG.WHEEL.BORDER_WIDTH * 0.9;
+
+    // Aro exterior
+    ctx.beginPath();
+    ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(8, 12, 40, 0.9)';
+    ctx.fill();
+
+    ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.75;
+    ctx.strokeStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(110, 168, 255, 0.85)';
+    ctx.shadowBlur = 24;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Base oscura debajo de segmentos
+    ctx.beginPath();
+    ctx.arc(0, 0, radius + 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#050720';
+    ctx.fill();
+
     ctx.rotate(angle);
 
     const sliceAngle = (Math.PI * 2) / prizes.length;
@@ -78,41 +145,25 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       // Texto del premio
       ctx.save();
       ctx.rotate(startAngle + sliceAngle / 2);
-      ctx.translate(radius * 0.65, 0);
-      ctx.rotate(Math.PI );
-      
-      // Color del texto - SIEMPRE BLANCO para mejor contraste
-      const textColor = "#FFFFFF";
-      
- 
-      const fontSize = 'bold 1.35rem';
-      const winnerFontSize = 'bold 1.85rem';
-      
-      ctx.fillStyle = textColor;
-      ctx.font = isWinner ? `${winnerFontSize} 'Arial Black', sans-serif` : `${fontSize} 'Arial Black', sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.shadowColor = "#000000";
-      ctx.shadowBlur = 15; // Aumentar sombra para mejor legibilidad
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
-      
-      const maxTextWidth = radius * 0.9;
-      let currentFont = ctx.font;
-      let metrics = ctx.measureText(prize);
-      
-      // Verificar si es un premio QR
-      const isQR = prize.startsWith('QR');
-      
-      // Ajustar tamaño de fuente si es necesario
-      if (metrics.width > maxTextWidth) {
-        const smallerFontSize = isQR ? "bold 18px" : "bold 16px";
-        const smallerWinnerFontSize = isQR ? "bold 20px" : "bold 18px";
-        currentFont = isWinner ? `${smallerWinnerFontSize} 'Arial Black', sans-serif` : `${smallerFontSize} 'Arial Black', sans-serif`;
-        ctx.font = currentFont;
+      ctx.translate(radius * 0.58, 0);
+      ctx.rotate(Math.PI);
+
+      const icon = iconImages[prize];
+      if (icon && icon.complete) {
+        const iconSize = Math.min(radius * 0.42, 140);
+        ctx.drawImage(icon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+      } else {
+        const textColor = "#FFFFFF";
+        const fontSize = 'bold 1.5rem';
+
+        ctx.fillStyle = textColor;
+        ctx.font = `${fontSize} 'Arial Black', sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "#000000";
+        ctx.shadowBlur = 18;
+        ctx.fillText(prize, 0, 0);
       }
-      
-      ctx.fillText(prize, 0, 0);
       ctx.restore();
     });
 /*
@@ -193,22 +244,25 @@ prizes.forEach((_, index) => {
 });*/
 
     // Centro de la rueda
+    const hubRadius = Math.max(size * 0.065, 32);
+    const hubGradient = ctx.createRadialGradient(0, 0, hubRadius * 0.2, 0, 0, hubRadius);
+    hubGradient.addColorStop(0, '#39b4ff');
+    hubGradient.addColorStop(1, '#0b1fff');
+
     ctx.beginPath();
-    ctx.arc(0, 0, 30, 0, Math.PI * 2);
-    ctx.fillStyle = CONFIG.WHEEL.COLORS.BASE;
+    ctx.arc(0, 0, hubRadius, 0, Math.PI * 2);
+    ctx.fillStyle = hubGradient;
     ctx.fill();
     
-    ctx.beginPath();
-    ctx.arc(0, 0, 35, 0, Math.PI * 2);
-    ctx.fillStyle = CONFIG.WHEEL.COLORS.CENTER;
-    ctx.fill();
-    
-    ctx.strokeStyle = CONFIG.WHEEL.COLORS.BORDER;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(110, 168, 255, 0.75)';
+    ctx.shadowBlur = 18;
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
     ctx.restore();
-  }, [angle, prizes, winnerIndex, size]);
+  }, [angle, prizes, winnerIndex, size, iconImages]);
 
   return (
     <canvas 
