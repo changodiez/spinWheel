@@ -1,33 +1,15 @@
-/* Flecha neón minimalista */
 .pointer-tip-wrapper {
   position: relative;
-  transform-origin: top center;
-  transition: transform 0.05s ease-out;
   display: flex;
   justify-content: center;
+  transform-origin: top center;
+  transition: transform 0.05s ease-out;
   translate: 0 18px;
 }
 
-.pointer-tip-shape {
-  width: calc(var(--pointer-width));
-  height: calc(var(--pointer-height));
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  background: linear-gradient(180deg, #ff47d6 0%, #ff2cb2 55%, #ff008a 100%);
-  border: calc(var(--pointer-width) * 0.08) solid #ffffff;
-  border-bottom-width: calc(var(--pointer-width) * 0.12);
-  border-bottom-color: transparent;
-  box-shadow:
-    0 0 20px rgba(255, 71, 214, 0.85),
-    0 0 40px rgba(255, 71, 214, 0.65);
-}
+.pointer-tip {
+  width: var(--pointer-width, 44px);
+  height: var(--pointer-height, 44px);
+  display: block;
 
-.pointer-tip-shape::after {
-  content: '';
-  position: absolute;
-  inset: 18% 32% auto 32%;
-  height: 28%;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  filter: blur(2px);
 }
-

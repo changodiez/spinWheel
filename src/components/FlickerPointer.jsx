@@ -65,12 +65,12 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   }, [bend]);
   
   // Calcular todos los tamaños proporcionales a la rueda
-  const pointerWidth = wheelSize * 0.16;
-  const pointerHeight = wheelSize * 0.12;
+  const pointerWidth = wheelSize * 0.20;
+  const pointerHeight = wheelSize * 0.15;
 
   const pointerStyle = {
     position: 'absolute',
-    top: '2.5%',
+    top: '0',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 20,
@@ -87,7 +87,28 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
           transform: `rotate(${bend}deg)`
         }}
       >
-        <div className="pointer-tip-shape"></div>
+        <div 
+  className="pointer-tip-wrapper"
+  style={{ 
+    '--pointer-width': `${pointerWidth}px`,
+    '--pointer-height': `${pointerHeight}px`,
+    transform: `rotate(${bend}deg)` // igual que antes
+  }}
+>
+  <svg className="pointer-tip" viewBox="0 0 100 100" aria-hidden="true">
+
+
+    {/* Triángulo invertido (apunta hacia abajo) */}
+    <path
+      d="M50 92 L14 18 H86 Z"
+      fill="var(--pointer-fill, #ff22cf)"
+      stroke="#ffffff"
+      strokeWidth="10"
+      strokeLinejoin="round"
+      filter="url(#glow)"
+    />
+  </svg>
+</div>
       </div>
     </div>
   );
