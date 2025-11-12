@@ -80,7 +80,7 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
     >
       <div className="winner-popup-content" onClick={handlePopupClick}>
         <div className="popup-inner">
-          <h1 id="winner-title" className="popup-title">YOU WIN!</h1>
+          <h1 id="winner-title" className="popup-title">YOU WIN</h1>
 
           <div className="prize-image-container">
             <div className="prize-image" role="img" aria-label={winner.prize}>

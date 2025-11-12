@@ -29,8 +29,8 @@ app.use(express.json());
 
 // Estado de los premios
 let prizes = [
-  "Tote Bag", "Camiseta", "QR1", "Gorra", "Mug", 
-  "QR2", "Pin", "Patch", "QR3", "Luggage Tag", "Calcetín"
+  "Tote", "Sticker", "Cool Cap", "Tattoo", "Socks", "T-Shirt", "Mug", "Label", "PeraWallet", "Pin", "Lanyard"
+
 ];
 
 let clients = [];

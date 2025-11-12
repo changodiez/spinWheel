@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Minecrafter';
+  src: url('../assets/font/Minecrafter.Reg.ttf') format('truetype');
+  font-display: swap;
+}
+
 .winner-popup-overlay {
   position: fixed;
   top: 0;
@@ -21,9 +27,8 @@
 
 .winner-popup-content {
   position: relative;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   padding: 60px;
-  border-radius: 20px;
   width: 600px;
   max-width: 70vw;
 
@@ -58,7 +63,6 @@
 }
 
 .celebration-icon {
-  font-size: 60px;
   margin-bottom: 20px;
   animation: 
     bounce 0.8s ease-in-out,
@@ -67,8 +71,8 @@
 }
 
 .popup-title {
-  font-size: 64px;
-  font-weight: 900;
+  font-size: 60px;
+  font-family: 'Minecrafter';
   color: #ffffff;
   margin-bottom: 10px;
   text-transform: uppercase;
@@ -82,8 +86,8 @@
 }
 
 .prize-name {
+  font-family: 'Minecrafter';
   font-size: 56px;
-  font-weight: 900;
   color: #ffffff;
   background-clip: text;
   margin: 0;

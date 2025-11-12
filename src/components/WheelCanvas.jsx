@@ -99,9 +99,6 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
     ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.5;
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
-
-
-    // Base oscura debajo de segmentos
    
 
     ctx.rotate(angle);
@@ -141,13 +138,13 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
 
       // Texto / icono
       ctx.save();
-      ctx.rotate(startAngle + sliceAngle / 2);  // eje X = radial hacia afuera
-      ctx.translate(radius * 0.87, 0);          // coloca el icono
-      ctx.rotate(Math.PI / 2);                  // hace que el “top” del icono apunte al centro
+      ctx.rotate(startAngle + sliceAngle / 2);  
+      ctx.translate(radius * 0.87, 0);          
+      ctx.rotate(Math.PI / 2);                 
 
       const icon = iconImages[prize];
       if (icon && icon.complete) {
-        const iconSize = Math.min(radius * 0.3, 150);
+        const iconSize = Math.min(radius * 0.35, 150);
         ctx.drawImage(icon, -iconSize / 2, 2, iconSize, iconSize);
       } else {
         ctx.textAlign = "center";
