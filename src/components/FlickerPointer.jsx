@@ -110,16 +110,54 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
   }}
 >
   <svg className="pointer-tip" viewBox="0 0 100 100" aria-hidden="true">
+    <defs>
+      {/* Filtro de neón rosa/magenta */}
+      <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      {/* Filtro de neón más intenso para el borde */}
+      <filter id="neonGlowStrong" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+        <feGaussianBlur stdDeviation="2" result="coloredBlur2"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="coloredBlur2"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
 
-
-    {/* Triángulo invertido (apunta hacia abajo) */}
+    {/* Capas de neón para el triángulo */}
+    <path
+      d="M50 92 L14 18 H86 Z"
+      fill="var(--pointer-fill, #ff22cf)"
+      stroke="rgba(255, 34, 207, 0.8)"
+      strokeWidth="10"
+      strokeLinejoin="round"
+      filter="url(#neonGlowStrong)"
+      opacity="0.6"
+    />
+    <path
+      d="M50 92 L14 18 H86 Z"
+      fill="var(--pointer-fill, #ff22cf)"
+      stroke="rgba(255, 34, 207, 0.9)"
+      strokeWidth="8"
+      strokeLinejoin="round"
+      filter="url(#neonGlow)"
+      opacity="0.8"
+    />
+    {/* Triángulo principal */}
     <path
       d="M50 92 L14 18 H86 Z"
       fill="var(--pointer-fill, #ff22cf)"
       stroke="#ffffff"
       strokeWidth="10"
       strokeLinejoin="round"
-      filter="url(#glow)"
+      filter="url(#neonGlow)"
     />
   </svg>
 </div>

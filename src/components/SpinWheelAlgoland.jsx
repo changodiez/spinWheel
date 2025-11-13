@@ -4,7 +4,8 @@ import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
 import backgroundVideo from '../assets/background/Spin_Video_BG.mp4';
-import headerImg from '../assets/img/header.png'
+import headerImg from '../assets/img/header.png';
+import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
 import './SpinWheelAlgoland.css';
 
 // Premios fijos para GitHub Pages
@@ -165,6 +166,7 @@ const SpinWheelAlgoland = () => {
         muted
         loop
         playsInline
+        preload="auto"
       />
       <div className="bg-overlay"></div>
 
@@ -206,6 +208,12 @@ const SpinWheelAlgoland = () => {
           aria-label={spinning ? 'Girando la ruleta' : 'Girar la ruleta'}
           className={`spin-button tv-button ${spinning ? 'spinning' : ''}`}
         >
+          <img 
+            src={buttonImg} 
+            alt="" 
+            className="button-bg-image"
+            aria-hidden="true"
+          />
           <span className="button-text">
             {spinning ? 'SPINNING…' : 'SPIN NOW'}
           </span>

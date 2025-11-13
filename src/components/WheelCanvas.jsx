@@ -1,17 +1,17 @@
 import React, { useRef, useEffect, memo, useState } from 'react';
 import { generateColor } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
-import ToteIcon from '../assets/img/Tote@2x.png';
-import CamisetaIcon from '../assets/img/Camiseta@2x.png';
-import GorraIcon from '../assets/img/Gorra@2x.png';
-import MugIcon from '../assets/img/Taza@2x.png';
-import PinIcon from '../assets/img/Pin@2x.png';
-import PatchIcon from '../assets/img/Pegatina@2x.png';
-import CalcetinIcon from '../assets/img/Calcetin@2x.png';
-import LuggageIcon from '../assets/img/Maleta@2x.png';
-import QRWalletIcon from '../assets/img/PeraWallet@2x.png';
-import TatooIcon from '../assets/img/Tattoo@2x.png';
-import LanyardIcon from '../assets/img/Lanyard@2x.png';
+import ToteIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Tote@2x.png';
+import CamisetaIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Camiseta@2x.png';
+import GorraIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Gorra@2x.png';
+import MugIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Taza@2x.png';
+import PinIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Pin@2x.png';
+import PatchIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Pegatina@2x.png';
+import CalcetinIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Calcetin@2x.png';
+import LuggageIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Maleta@2x.png';
+import QRWalletIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/PeraWallet@2x.png';
+import TatooIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Tattoo@2x.png';
+import LanyardIcon from '../assets/img/EXPORT EFECTOS/Iconos Negro efecto/Lanyard@2x.png';
 
 import centerWheel from '../assets/img/centerWheel.png';
 
@@ -92,13 +92,41 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
 
     const outerRadius = radius + CONFIG.WHEEL.BORDER_WIDTH * 0.75;
 
-    // Aro exterior
+    // Aro exterior con efecto neón
+    ctx.save();
+    
+    // Primera capa de neón (más externa y difusa)
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
     ctx.beginPath();
     ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
-
     ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.5;
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
+    
+    // Segunda capa de neón (intermedia)
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Tercera capa de neón (más cercana al borde)
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+    ctx.beginPath();
+    ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Borde principal (sin sombra para que sea nítido)
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
+    ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+    
+    ctx.restore();
    
 
     ctx.rotate(angle);

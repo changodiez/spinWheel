@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './WinnerPopup.css';
 
-import ToteIcon from '../assets/img/Tote@2x.png';
-import CamisetaIcon from '../assets/img/Camiseta@2x.png';
-import GorraIcon from '../assets/img/Gorra@2x.png';
-import MugIcon from '../assets/img/Taza@2x.png';
-import PinIcon from '../assets/img/Pin@2x.png';
-import PatchIcon from '../assets/img/Pegatina@2x.png';
-import CalcetinIcon from '../assets/img/Calcetin@2x.png';
-import LuggageIcon from '../assets/img/Maleta@2x.png';
-import QRWalletIcon from '../assets/img/PeraWallet@2x.png';
-import TatooIcon from '../assets/img/Tattoo@2x.png';
-import LanyardIcon from '../assets/img/Lanyard@2x.png';
+import ToteIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Tote@2x.png';
+import CamisetaIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Camiseta@2x.png';
+import GorraIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Gorra@2x.png';
+import MugIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Taza@2x.png';
+import PinIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Pin@2x.png';
+import PatchIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Pegatina@2x.png';
+import CalcetinIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Calcetin@2x.png';
+import LuggageIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Maleta@2x.png';
+import QRWalletIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/PeraWallet@2x.png';
+import TatooIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Tattoo@2x.png';
+import LanyardIcon from '../assets/img/EXPORT EFECTOS/Iconos blancos efecto/Lanyard@2x.png';
 
 const PRIZE_IMAGES  = {
   'Tote':        { type: "image", src: ToteIcon },
