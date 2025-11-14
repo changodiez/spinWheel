@@ -3,6 +3,8 @@ import { useWheelAnimation } from '../hooks/useWheelAnimation';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
+import ReferenceOverlay from './ReferenceOverlay';
+import ReferenceIMG from '../assets/img/layout2.jpg';
 import backgroundVideo from '../assets/background/Spin_Video_BG.mp4';
 import headerImg from '../assets/img/header.png';
 import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
@@ -109,8 +111,8 @@ const SpinWheelAlgoland = () => {
   useEffect(() => {
     const computeWheelSize = () => {
       const minSide = Math.min(window.innerWidth, window.innerHeight);
-      const target = Math.floor(minSide * 0.82);
-      const clamped = Math.max(560, Math.min(target, 960));
+      const target = Math.floor(minSide * 0.902); // 0.82 * 1.1 = 0.902 (10% más grande)
+      const clamped = Math.max(616, Math.min(target, 1056)); // 560*1.1=616, 960*1.1=1056
       setWheelSize(clamped);
     };
     computeWheelSize();
@@ -201,11 +203,7 @@ const SpinWheelAlgoland = () => {
           />
         </div>
 
-        <button
-          onClick={handleSpin}
-          onTouchStart={handleTouchStart}
-          disabled={spinning || prizes.length === 0}
-          aria-label={spinning ? 'Girando la ruleta' : 'Girar la ruleta'}
+        <div
           className={`spin-button tv-button ${spinning ? 'spinning' : ''}`}
         >
           <img 
@@ -217,7 +215,7 @@ const SpinWheelAlgoland = () => {
           <span className="button-text">
             {spinning ? 'SPINNING…' : 'SPIN NOW'}
           </span>
-        </button>
+        </div>
 
         <WinnerPopup
           winner={showWinner ? winner : null}
@@ -225,6 +223,9 @@ const SpinWheelAlgoland = () => {
           autoCloseTime={isDemoMode ? 8000 : 15000}
         />
       </div>
+      
+      {/* Overlay de referencia - Presiona 'B' para activar/desactivar */}
+      <ReferenceOverlay imagePath={ReferenceIMG} />
     </div>
   );
 };

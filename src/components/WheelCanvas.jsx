@@ -91,15 +91,21 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
     // Radio de la ruleta (más pequeño para que visualmente ocupe el mismo espacio)
     // El canvas es más grande, pero la ruleta debe ser del tamaño visual original
     const wheelVisualRadius = size / 2;
-    const radius = wheelVisualRadius - CONFIG.WHEEL.BORDER_WIDTH;
+    
+    // Reducir el radio de la ruleta en un 7% (hacerla más pequeña)
+    // La ruleta interna (segmentos) será 7% más pequeña, pero el aro exterior se mantiene igual
+    const originalRadius = wheelVisualRadius - CONFIG.WHEEL.BORDER_WIDTH;
+    const radius = originalRadius * 0.93; // 7% más pequeña
+    
+    // El aro exterior se mantiene en la posición original (mismo tamaño)
+    // Esto crea más espacio entre la ruleta y el aro
+    const outerRadius = originalRadius + CONFIG.WHEEL.BORDER_WIDTH * 0.5;
 
     // Limpiar canvas
     ctx.clearRect(0, 0, canvasSize, canvasSize);
 
     ctx.save();
     ctx.translate(centerX, centerY);
-
-    const outerRadius = radius + CONFIG.WHEEL.BORDER_WIDTH * 0.75;
 
     // Aro exterior con efecto neón
     ctx.save();
@@ -131,7 +137,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
-    ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.5;
+    ctx.lineWidth = CONFIG.WHEEL.BORDER_WIDTH * 0.7;
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
     
@@ -176,12 +182,12 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       // Texto / icono
       ctx.save();
       ctx.rotate(startAngle + sliceAngle / 2);  
-      ctx.translate(radius * 0.87, 0);          
+      ctx.translate(radius * 0.9, 0);          
       ctx.rotate(Math.PI / 2);                 
 
       const icon = iconImages[prize];
       if (icon && icon.complete) {
-        const iconSize = Math.min(radius * 0.35, 150);
+        const iconSize = Math.min(165, 250);
         ctx.drawImage(icon, -iconSize / 2, 2, iconSize, iconSize);
       } else {
         ctx.textAlign = "center";

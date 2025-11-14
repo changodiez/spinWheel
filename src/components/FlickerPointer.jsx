@@ -78,13 +78,13 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
     return () => clearInterval(interval);
   }, [bend]);
   
-  // Calcular todos los tamaños proporcionales a la rueda
-  const pointerWidth = wheelSize * 0.20;
-  const pointerHeight = wheelSize * 0.15;
+  // Calcular todos los tamaños proporcionales a la rueda (3% + 5% más grande)
+  const pointerWidth = wheelSize * 0.2163; // 0.20 * 1.03 * 1.05 = 0.2163
+  const pointerHeight = wheelSize * 0.162225; // 0.15 * 1.03 * 1.05 = 0.162225
 
   const pointerStyle = {
     position: 'absolute',
-    top: '0',
+    top: '-65px', // 35px más arriba
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 20,
@@ -155,7 +155,7 @@ const FlickerPointer = memo(({ angle, prizes, wheelSize, velocity = 0 }) => {
       d="M50 92 L14 18 H86 Z"
       fill="var(--pointer-fill, #ff22cf)"
       stroke="#ffffff"
-      strokeWidth="10"
+      strokeWidth="8"
       strokeLinejoin="round"
       filter="url(#neonGlow)"
     />
