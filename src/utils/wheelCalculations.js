@@ -5,20 +5,19 @@ export const generateColor = (index, total, prizeName) => {
     return PRIZE_COLORS[prizeName];
   }
   
-  // Colores basados en la imagen: amarillo, azul claro, azul oscuro, naranja, rosa, verde claro, verde, morado claro, morado
+  // Colores basados en la imagen de la ruleta (11 segmentos en orden horario desde arriba)
   const baseColors = [
-    '#FFD700',  // Amarillo (dorado vibrante)
-    '#5BA3F5',  // Azul claro (cielo)
-    '#1E3A8A',  // Azul oscuro (marino)
-    '#FF7F50',  // Naranja (coral)
-    '#FF1493',  // Rosa (deep pink)
-    '#7FFF00',  // Verde claro (chartreuse)
-    '#00FF00',  // Verde (lime)
-    '#DA70D6',  // Morado claro (orchid)
-    '#8B00FF',  // Morado (violeta)
-    '#FFE44D',  // Amarillo claro (amarillo pastel)
-    '#87CEEB',  // Azul claro (sky blue)
-    '#BA55D3'   // Morado claro (medium orchid)
+    '#FFEB3B',  // 1. Bright Yellow (amarillo brillante)
+    '#20B2AA',  // 2. Teal (verde azulado)
+    '#DDA0DD',  // 3. Light Lavender (lavanda claro)
+    '#4169E1',  // 4. Royal Blue (azul real)
+    '#FF8C00',  // 5. Bright Orange (naranja brillante)
+    '#50C878',  // 6. Emerald Green (verde esmeralda)
+    '#FF1493',  // 7. Hot Pink (rosa fucsia)
+    '#00CED1',  // 8. Bright Cyan (cian brillante)
+    '#32CD32',  // 9. Lime Green (verde lima)
+    '#FFB6C1',  // 10. Light Pink (rosa claro)
+    '#9370DB'   // 11. Medium Purple (morado medio)
   ];
   
   return baseColors[index % baseColors.length];

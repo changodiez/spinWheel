@@ -32,6 +32,9 @@ const ICON_SOURCES = {
 };
 
 const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
+  // Padding para el glow (el shadowBlur más grande es 30px, agregamos margen)
+  const GLOW_PADDING = 50;
+  
   const canvasRef = useRef(null);
   const [iconImages, setIconImages] = useState({});
 
@@ -73,19 +76,25 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
 
-    // Configurar canvas para alta resolución
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
+    const canvasSize = size + (GLOW_PADDING * 2);
+    
+    // Tamaño real del canvas (más grande para incluir el glow)
+    // El estilo se maneja en el JSX, aquí solo configuramos el tamaño interno
+    canvas.width = canvasSize * dpr;
+    canvas.height = canvasSize * dpr;
     ctx.scale(dpr, dpr);
 
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 2 - CONFIG.WHEEL.BORDER_WIDTH;
+    // Centro del canvas (más grande)
+    const centerX = canvasSize / 2;
+    const centerY = canvasSize / 2;
+    
+    // Radio de la ruleta (más pequeño para que visualmente ocupe el mismo espacio)
+    // El canvas es más grande, pero la ruleta debe ser del tamaño visual original
+    const wheelVisualRadius = size / 2;
+    const radius = wheelVisualRadius - CONFIG.WHEEL.BORDER_WIDTH;
 
     // Limpiar canvas
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
 
     ctx.save();
     ctx.translate(centerX, centerY);
@@ -209,13 +218,32 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
 
   }, [angle, prizes, winnerIndex, size, iconImages, centerImg]);
 
+  const canvasSize = size + (GLOW_PADDING * 2);
+  
   return (
-    <canvas
-      ref={canvasRef}
-      className="wheel-canvas"
-      aria-label="Ruleta de premios giratoria"
-      role="img"
-    />
+    <div 
+      className="wheel-canvas-wrapper"
+      style={{
+        width: `${size}px`,
+        height: `${size}px`
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="wheel-canvas"
+        aria-label="Ruleta de premios giratoria"
+        role="img"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: `${canvasSize}px`,
+          height: `${canvasSize}px`,
+          display: 'block'
+        }}
+      />
+    </div>
   );
 });
 
