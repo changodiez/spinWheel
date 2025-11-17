@@ -8,6 +8,7 @@ import ReferenceIMG from '../assets/img/layout2.jpg';
 import backgroundVideo from '../assets/background/Spin_Video_BG.mp4';
 import headerImg from '../assets/img/header.png';
 import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
+import { selectWeightedWinner } from '../utils/wheelCalculations';
 import './SpinWheelAlgoland.css';
 
 // Premios fijos para GitHub Pages
@@ -141,6 +142,81 @@ const SpinWheelAlgoland = () => {
       setShowWinner(true);
     }
   }, [winner]);
+
+  // Exponer función de simulación en window para uso desde consola
+  useEffect(() => {
+    const simulateSpins = (numSpins = 1000) => {
+      const canSelectPeraWallet = () => true;
+      
+      // Contador de resultados
+      const counts = {};
+      DEFAULT_PRIZES.forEach(prize => {
+        counts[prize] = 0;
+      });
+      
+      console.log(`🎲 Simulando ${numSpins} tiros...`);
+      const startTime = performance.now();
+      
+      for (let i = 0; i < numSpins; i++) {
+        const winnerIndex = selectWeightedWinner(DEFAULT_PRIZES, canSelectPeraWallet, false);
+        const winnerPrize = DEFAULT_PRIZES[winnerIndex];
+        counts[winnerPrize]++;
+      }
+      
+      const endTime = performance.now();
+      const duration = ((endTime - startTime) / 1000).toFixed(2);
+      
+      // Calcular probabilidades teóricas (usar el mismo peso que en wheelCalculations.js)
+      // Nota: Si cambias el peso en wheelCalculations.js, actualiza este valor también
+      const PRIZE_WEIGHTS = {
+        'PeraWallet': 0.4, // Debe coincidir con el valor en wheelCalculations.js
+      };
+      const totalWeight = DEFAULT_PRIZES.reduce((sum, prize) => {
+        const weight = PRIZE_WEIGHTS[prize] || 1.0;
+        return sum + weight;
+      }, 0);
+      
+      // Mostrar resultados
+      console.log(`\n✅ Simulación completada en ${duration}s\n`);
+      console.log('📊 RESULTADOS DE LA SIMULACIÓN:');
+      console.log('═'.repeat(90));
+      console.log(`${'Premio'.padEnd(20)} | ${'Teórico %'.padEnd(12)} | ${'Teórico #'.padEnd(12)} | ${'Simulado #'.padEnd(12)} | ${'Real %'.padEnd(10)} | ${'Diferencia'.padEnd(12)}`);
+      console.log('─'.repeat(90));
+      
+      DEFAULT_PRIZES.forEach(prize => {
+        const weight = PRIZE_WEIGHTS[prize] || 1.0;
+        const theoreticalProb = weight / totalWeight;
+        const theoreticalCount = theoreticalProb * numSpins;
+        const actualCount = counts[prize];
+        const actualPercent = (actualCount / numSpins * 100).toFixed(2);
+        const theoreticalPercent = (theoreticalProb * 100).toFixed(2);
+        const difference = actualCount - theoreticalCount;
+        const diffPercent = (difference / theoreticalCount * 100).toFixed(2);
+        
+        console.log(
+          `${prize.padEnd(20)} | ${theoreticalPercent.padStart(6)}% | ${Math.round(theoreticalCount).toString().padStart(4)} | ${actualCount.toString().padStart(4)} | ${actualPercent.padStart(6)}% | ${difference >= 0 ? '+' : ''}${difference.toFixed(0).padStart(4)} (${diffPercent.padStart(6)}%)`
+        );
+      });
+      
+      console.log('═'.repeat(90));
+      console.log(`\n📈 Estadísticas:`);
+      console.log(`   Total de tiros: ${numSpins}`);
+      console.log(`   PeraWallet: ${counts['PeraWallet']} veces (${(counts['PeraWallet'] / numSpins * 100).toFixed(2)}%)`);
+      const otherPrizesCount = numSpins - counts['PeraWallet'];
+      const otherPrizesAvg = otherPrizesCount / (DEFAULT_PRIZES.length - 1);
+      console.log(`   Otros premios promedio: ${otherPrizesAvg.toFixed(1)} veces por premio`);
+      console.log(`   Ratio PeraWallet vs Otros: 1:${(otherPrizesAvg / counts['PeraWallet']).toFixed(2)}`);
+      
+      return counts;
+    };
+    
+    window.simulateSpins = simulateSpins;
+    console.log('✅ Función de simulación disponible. Ejecuta: simulateSpins(1000)');
+    
+    return () => {
+      delete window.simulateSpins;
+    };
+  }, []);
 
   const handleSpin = useCallback(() => {
     startSpin();

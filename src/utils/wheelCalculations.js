@@ -87,12 +87,37 @@ export const selectWeightedWinner = (prizes, canSelectPeraWalletFn = null, showL
   if (showLogs) {
     const winnerPrize = prizes[selectedIndex];
     const winnerPrizeName = typeof winnerPrize === 'string' ? winnerPrize : winnerPrize.name;
+    
+    // Encontrar la probabilidad correcta del premio seleccionado
+    let correctProbability = 'N/A';
+    for (let i = 0; i < availablePrizes.length; i++) {
+      const prize = availablePrizes[i];
+      const prizeName = typeof prize === 'string' ? prize : prize.name;
+      if (prizeName === winnerPrizeName) {
+        correctProbability = probabilities[i]?.toFixed(4) || 'N/A';
+        break;
+      }
+    }
+    
     console.log('🎲 Selección ponderada:', {
       premio: winnerPrizeName,
       indice: selectedIndex,
-      probabilidad: probabilities[selectedIndex]?.toFixed(4) || 'N/A',
+      probabilidad: correctProbability,
       random: random.toFixed(4)
     });
+    
+    // Log detallado de todos los pesos (solo la primera vez o cuando cambian)
+    if (showLogs && Math.random() < 0.1) { // Solo 10% de las veces para no saturar
+      console.log('📊 Pesos de premios:', availablePrizes.map((prize, i) => {
+        const prizeName = typeof prize === 'string' ? prize : prize.name;
+        const weight = PRIZE_WEIGHTS[prizeName] || 1.0;
+        return {
+          premio: prizeName,
+          peso: weight,
+          probabilidad: (probabilities[i] * 100).toFixed(2) + '%'
+        };
+      }));
+    }
   }
   
   return selectedIndex;

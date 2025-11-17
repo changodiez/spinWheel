@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSoundEffects } from './useSoundEffects';
-import { selectWeightedWinner, calculateAngleForIndex, calculateWinnerIndexFromAngle } from '../utils/wheelCalculations';
+import { selectWeightedWinner, calculateWinnerIndexFromAngle, calculateAngleForIndex } from '../utils/wheelCalculations';
 import { CONFIG } from '../constants/config';
 
 export const useWheelAnimation = (prizes) => {
@@ -9,14 +9,24 @@ export const useWheelAnimation = (prizes) => {
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   
-  const requestRef = useRef();
+  const animationRef = useRef();
+  const forcedWinnerRef = useRef(null);
+  const targetAngleRef = useRef(null); // Ángulo objetivo donde debe detenerse
   const lastTimeRef = useRef();
-  const lastTickAngleRef = useRef(0);
   const lastSliceRef = useRef(0);
-  const targetWinnerIndexRef = useRef(null); // Índice del ganador predeterminado antes del giro
-  const targetAngleRef = useRef(null); // Ángulo objetivo donde debe detenerse la rueda
+  const angleRef = useRef(0);
+  const velocityRef = useRef(0);
   
   const { playTick, playWin, initializeAudio } = useSoundEffects();
+  
+  // Sincronizar refs con el estado
+  useEffect(() => {
+    angleRef.current = angle;
+  }, [angle]);
+  
+  useEffect(() => {
+    velocityRef.current = velocity;
+  }, [velocity]);
 
   useEffect(() => {
     const handleFirstInteraction = () => {
@@ -35,11 +45,85 @@ export const useWheelAnimation = (prizes) => {
   }, [initializeAudio]);
 
   const stopAnimation = useCallback(() => {
-    if (requestRef.current) {
-      cancelAnimationFrame(requestRef.current);
-      requestRef.current = null;
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
     }
     lastTimeRef.current = null;
+  }, []);
+
+  // Función para calcular la velocidad inicial necesaria para detenerse en el ángulo objetivo
+  const calculateOptimalVelocity = useCallback((angleToTravel) => {
+    // Estimar rango inicial basado en la distancia
+    // Para distancias largas, necesitamos velocidades más altas
+    const estimatedMinVel = Math.max(CONFIG.PHYSICS.MIN_VELOCITY, angleToTravel * 0.3);
+    const estimatedMaxVel = Math.min(CONFIG.PHYSICS.MAX_VELOCITY, angleToTravel * 0.8);
+    
+    let low = estimatedMinVel;
+    let high = estimatedMaxVel;
+    let bestVelocity = (low + high) / 2;
+    let bestError = Infinity;
+    
+    // Búsqueda binaria con más iteraciones para mayor precisión
+    for (let iter = 0; iter < 300; iter++) {
+      const testVelocity = (low + high) / 2;
+      
+      // Simular la física EXACTAMENTE como en la animación real
+      let simulatedAngle = 0;
+      let simulatedVelocity = -testVelocity; // Velocidad NEGATIVA como en la animación
+      let simTime = 0;
+      
+      // Simular con deltaTime promedio (16.67ms = 60fps) para simulación determinista
+      const simDeltaTime = 0.01667; // Promedio de 60fps
+      
+      while (Math.abs(simulatedVelocity) > CONFIG.PHYSICS.STOP_THRESHOLD && simTime < 30) {
+        // Usar deltaTime fijo pero representativo (promedio de 60fps)
+        const delta = Math.min(simDeltaTime, 0.033);
+        
+        // EXACTAMENTE la misma física: newAngle = angle - velocity * deltaTime
+        simulatedAngle = simulatedAngle - simulatedVelocity * delta;
+        
+        // EXACTAMENTE la misma fricción
+        simulatedVelocity = simulatedVelocity * (1 - delta * CONFIG.PHYSICS.FRICTION);
+        
+        simTime += delta;
+      }
+      
+      const error = Math.abs(simulatedAngle - angleToTravel);
+      
+      if (error < bestError) {
+        bestError = error;
+        bestVelocity = testVelocity;
+      }
+      
+      // Búsqueda binaria
+      if (simulatedAngle < angleToTravel) {
+        low = testVelocity;
+        // Si llegamos al límite y aún no alcanzamos, expandir el rango
+        if (low >= high - 0.01 && high < CONFIG.PHYSICS.MAX_VELOCITY) {
+          high = Math.min(CONFIG.PHYSICS.MAX_VELOCITY, high * 1.5);
+        }
+      } else {
+        high = testVelocity;
+        // Si llegamos al límite y nos pasamos, reducir el mínimo
+        if (high <= low + 0.01 && low > CONFIG.PHYSICS.MIN_VELOCITY) {
+          low = Math.max(CONFIG.PHYSICS.MIN_VELOCITY, low * 0.8);
+        }
+      }
+      
+      // Tolerancia muy estricta
+      if (error < 0.0005) break;
+    }
+    
+    console.log('🔧 Velocidad óptima calculada:', {
+      velocidad: bestVelocity.toFixed(4),
+      error: bestError.toFixed(4),
+      distanciaObjetivo: angleToTravel.toFixed(4),
+      errorPorcentual: ((bestError / angleToTravel) * 100).toFixed(2) + '%',
+      rangoUsado: `[${estimatedMinVel.toFixed(2)}, ${estimatedMaxVel.toFixed(2)}]`
+    });
+    
+    return Math.max(CONFIG.PHYSICS.MIN_VELOCITY, Math.min(CONFIG.PHYSICS.MAX_VELOCITY, bestVelocity));
   }, []);
 
   const animate = useCallback((time) => {
@@ -52,62 +136,33 @@ export const useWheelAnimation = (prizes) => {
       lastTimeRef.current = time;
       if (prizes.length > 0) {
         const sliceAngle = (Math.PI * 2) / prizes.length;
-        const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        const normalizedAngle = ((angleRef.current % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         const pointerAngle = Math.PI * 1.5; // 3π/2
         const relativeAngle = ((pointerAngle - normalizedAngle) + Math.PI * 2) % (Math.PI * 2);
         lastSliceRef.current = Math.floor(relativeAngle / sliceAngle) % prizes.length;
       }
-      requestRef.current = requestAnimationFrame(animate);
+      animationRef.current = requestAnimationFrame(animate);
       return;
     }
 
     const deltaTime = Math.min((time - lastTimeRef.current) / 1000, 0.033);
     lastTimeRef.current = time;
     
-    let newAngle = angle - velocity * deltaTime;
-    let newVelocity = velocity * (1 - deltaTime * CONFIG.PHYSICS.FRICTION);
+    // Física simple: desaceleración constante
+    // Usar refs para obtener los valores más actuales
+    let currentAngle = angleRef.current;
+    let currentVelocity = velocityRef.current;
     
-    // Aplicar magnetización progresiva hacia el objetivo cuando la velocidad es baja
-    // La fuerza aumenta cuando la velocidad disminuye, haciendo que sea más efectiva
-    if (targetAngleRef.current !== null && prizes.length > 0) {
-      const targetAngle = targetAngleRef.current;
-      const absVelocity = Math.abs(newVelocity);
-      
-      // Calcular diferencia angular (normalizada)
-      let angleDiff = targetAngle - newAngle;
-      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      
-      const absAngleDiff = Math.abs(angleDiff);
-      const sliceAngle = (Math.PI * 2) / prizes.length;
-      
-      // Aplicar magnetización cuando la velocidad es baja
-      // La fuerza aumenta progresivamente cuando la velocidad disminuye
-      if (absVelocity < 5.0) {
-        // Factor de lentitud: más lento = más fuerza (0 a 1)
-        const slownessFactor = Math.max(0, 1 - (absVelocity / 5.0));
-        
-        // Factor de proximidad: más cerca = más fuerza (dentro de 1.5 segmentos)
-        const maxProximity = sliceAngle * 1.5;
-        const proximityFactor = absAngleDiff < maxProximity 
-          ? Math.max(0, 1 - (absAngleDiff / maxProximity))
-          : 0;
-        
-        // Fuerza de atracción que aumenta cuando está más lento y más cerca
-        // Máxima fuerza cuando velocidad < 1.0 y está muy cerca
-        const attractionStrength = 0.4 * slownessFactor * proximityFactor;
-        
-        if (attractionStrength > 0.01) {
-          const direction = -Math.sign(angleDiff);
-          // La fuerza es proporcional a la distancia, pero limitada
-          const maxForce = 0.3;
-          const attractionForce = direction * Math.min(absAngleDiff * 1.5, maxForce) * attractionStrength;
-          
-          newVelocity = newVelocity + attractionForce;
-        }
-      }
-    }
+    let newAngle = currentAngle - currentVelocity * deltaTime;
+    let newVelocity = currentVelocity * (1 - deltaTime * CONFIG.PHYSICS.FRICTION);
+    
+    // NO aplicar magnetización - dejar que la física natural determine el resultado
+    
+    // Actualizar refs inmediatamente
+    angleRef.current = newAngle;
+    velocityRef.current = newVelocity;
 
+    // Detectar cambios de segmento para el sonido
     if (prizes.length > 0) {
       const sliceAngle = (Math.PI * 2) / prizes.length;
       const normalizedAngle = ((newAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -116,7 +171,7 @@ export const useWheelAnimation = (prizes) => {
       const currentSlice = Math.floor(relativeAngle / sliceAngle) % prizes.length;
       
       if (currentSlice !== lastSliceRef.current) {
-        playTick(Math.abs(velocity));
+        playTick();
         lastSliceRef.current = currentSlice;
       }
     }
@@ -124,57 +179,41 @@ export const useWheelAnimation = (prizes) => {
     setAngle(newAngle);
     setVelocity(newVelocity);
 
+    // Al detenerse: SIEMPRE mostrar el premio visual (el que está bajo el puntero)
     if (Math.abs(newVelocity) < CONFIG.PHYSICS.STOP_THRESHOLD) {
       setSpinning(false);
       
       // Calcular el premio que está visualmente bajo el puntero
-      let finalIndex = calculateWinnerIndexFromAngle(newAngle, prizes);
-      let finalAngle = newAngle;
-      
-      // Verificar si coincide con el predeterminado
-      const expectedIndex = targetWinnerIndexRef.current;
+      const visualWinnerIndex = calculateWinnerIndexFromAngle(newAngle, prizes);
+      const expectedWinnerIndex = forcedWinnerRef.current;
       const targetAngle = targetAngleRef.current;
       
-      if (expectedIndex !== null && expectedIndex !== undefined && targetAngle !== null) {
-        // Si no coincide, verificar si podemos hacer un ajuste muy sutil
-        if (finalIndex !== expectedIndex && prizes.length > 0) {
-          const sliceAngle = (Math.PI * 2) / prizes.length;
-          
-          // Calcular la diferencia angular normalizada
-          let angleDiff = targetAngle - newAngle;
-          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-          
-          // Solo ajustar si la diferencia es pequeña (menos de medio segmento)
-          // Esto significa que estamos muy cerca del objetivo
-          if (Math.abs(angleDiff) < sliceAngle * 0.5) {
-            // Ajuste muy sutil: mover hacia el ángulo objetivo
-            // Pero solo si estamos muy cerca (dentro de 0.1 radianes)
-            if (Math.abs(angleDiff) < 0.1) {
-              finalAngle = targetAngle;
-              finalIndex = expectedIndex;
-              setAngle(finalAngle);
-              console.log('🔧 Ajuste sutil aplicado para coincidir con el premio predeterminado');
-            }
-          }
-        }
-      }
+      // SIEMPRE usar el premio visual (el que realmente tocó)
+      const finalIndex = visualWinnerIndex;
       
       const winnerPrize = prizes[finalIndex];
       const winnerPrizeName = typeof winnerPrize === 'string' ? winnerPrize : winnerPrize.name;
       
-      // Log para depuración
-      if (expectedIndex !== null && expectedIndex !== undefined) {
-        const expectedPrize = prizes[expectedIndex];
+      // Log detallado para depuración
+      if (expectedWinnerIndex !== null && expectedWinnerIndex !== undefined && targetAngle !== null) {
+        const expectedPrize = prizes[expectedWinnerIndex];
         const expectedPrizeName = typeof expectedPrize === 'string' ? expectedPrize : expectedPrize.name;
         
-        if (finalIndex === expectedIndex) {
-          console.log('✅ Premio coincide con el predeterminado:', winnerPrizeName);
+        // Calcular diferencia angular
+        let angleDiff = targetAngle - newAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        
+        if (finalIndex === expectedWinnerIndex) {
+          console.log('✅ Premio visual coincide con el predeterminado:', winnerPrizeName);
         } else {
           console.warn('⚠️ Premio visual difiere del predeterminado:', {
             esperado: expectedPrizeName,
             visual: winnerPrizeName,
-            diferenciaAngular: ((targetAngle || 0) - finalAngle).toFixed(3)
+            anguloObjetivo: targetAngle.toFixed(3),
+            anguloFinal: newAngle.toFixed(3),
+            diferenciaAngular: angleDiff.toFixed(3),
+            'mostrando': 'visual (el que realmente tocó)'
           });
         }
       }
@@ -188,9 +227,7 @@ export const useWheelAnimation = (prizes) => {
       };
       
       setWinner(winnerData);
-      
-      // Resetear referencias
-      targetWinnerIndexRef.current = null;
+      forcedWinnerRef.current = null;
       targetAngleRef.current = null;
       
       setTimeout(() => {
@@ -201,8 +238,8 @@ export const useWheelAnimation = (prizes) => {
       return;
     }
     
-    requestRef.current = requestAnimationFrame(animate);
-  }, [spinning, angle, velocity, prizes, playTick, playWin, stopAnimation, calculateWinnerIndexFromAngle]);
+    animationRef.current = requestAnimationFrame(animate);
+  }, [spinning, prizes, playTick, playWin, stopAnimation, calculateWinnerIndexFromAngle]);
 
   useEffect(() => {
     if (!spinning) {
@@ -210,137 +247,93 @@ export const useWheelAnimation = (prizes) => {
       return;
     }
 
-    requestRef.current = requestAnimationFrame(animate);
+    animationRef.current = requestAnimationFrame(animate);
     
     return stopAnimation;
   }, [spinning, animate, stopAnimation]);
 
-  // Función auxiliar para calcular velocidad óptima con mayor precisión
-  const calculateOptimalVelocity = useCallback((angleToTravel) => {
-    const simDeltaTime = 0.016; // ~60fps
-    let low = CONFIG.PHYSICS.MIN_VELOCITY;
-    let high = CONFIG.PHYSICS.MAX_VELOCITY;
-    let bestVelocity = (low + high) / 2;
-    let bestError = Infinity;
-    
-    // Aumentar iteraciones para mayor precisión
-    for (let iter = 0; iter < 50; iter++) {
-      const testVelocity = (low + high) / 2;
-      
-      // Simular desaceleración usando EXACTAMENTE la misma física que la animación real
-      let simulatedAngle = 0;
-      let simulatedVelocity = testVelocity;
-      let simTime = 0;
-      let lastSimTime = 0;
-      
-      while (Math.abs(simulatedVelocity) > CONFIG.PHYSICS.STOP_THRESHOLD && simTime < 20) {
-        // Usar el mismo deltaTime limitado que la animación real
-        const delta = Math.min((simTime - lastSimTime) || simDeltaTime, 0.033);
-        lastSimTime = simTime;
-        
-        // Actualizar ángulo (igual que en la animación: angle - velocity * deltaTime)
-        simulatedAngle += simulatedVelocity * delta;
-        
-        // Aplicar fricción (igual que en la animación)
-        simulatedVelocity *= (1 - delta * CONFIG.PHYSICS.FRICTION);
-        
-        simTime += delta;
-      }
-      
-      const error = Math.abs(simulatedAngle - angleToTravel);
-      
-      if (error < bestError) {
-        bestError = error;
-        bestVelocity = testVelocity;
-      }
-      
-      if (simulatedAngle < angleToTravel) {
-        low = testVelocity;
-      } else {
-        high = testVelocity;
-      }
-      
-      // Parar si el error es muy pequeño
-      if (error < 0.005) break;
-    }
-    
-    console.log('🔧 Velocidad calculada:', {
-      velocidad: bestVelocity.toFixed(3),
-      error: bestError.toFixed(3),
-      distanciaObjetivo: angleToTravel.toFixed(3)
-    });
-    
-    return Math.max(CONFIG.PHYSICS.MIN_VELOCITY, Math.min(CONFIG.PHYSICS.MAX_VELOCITY, bestVelocity));
-  }, []);
-
   const startSpin = useCallback(() => {
     if (spinning || prizes.length === 0) return;
-    
+
     initializeAudio();
     stopAnimation();
+
+    // 1. ELEGIR PREMIO con probabilidad ponderada (PeraWallet tiene menos peso)
+    const canSelectPeraWallet = () => true; // Por ahora siempre true, se puede agregar lógica de límites después
+    const targetIndex = selectWeightedWinner(prizes, canSelectPeraWallet, true);
+    forcedWinnerRef.current = targetIndex;
     
-    // Determinar el ganador ANTES del giro usando probabilidades ponderadas
-    // Por ahora, canSelectPeraWallet siempre retorna true (se puede agregar lógica de límites después)
-    const canSelectPeraWallet = () => true;
-    const winnerIndex = selectWeightedWinner(prizes, canSelectPeraWallet, true);
-    targetWinnerIndexRef.current = winnerIndex;
-    
-    const winnerPrize = prizes[winnerIndex];
+    const winnerPrize = prizes[targetIndex];
     const winnerPrizeName = typeof winnerPrize === 'string' ? winnerPrize : winnerPrize.name;
-    console.log('✅ Ganador predeterminado (antes del giro):', winnerPrizeName, 'índice:', winnerIndex);
+    console.log('🎯 Premio elegido (probabilidad ponderada):', winnerPrizeName, 'índice:', targetIndex);
+
+    // 2. CALCULAR ÁNGULO OBJETIVO: dentro del segmento del premio elegido (con variación natural)
+    const N = prizes.length;
+    const segmentAngle = (2 * Math.PI) / N;
     
-    // VERIFICACIÓN CRÍTICA: Calcular y verificar el ángulo objetivo
-    let baseTargetAngle = calculateAngleForIndex(winnerIndex, prizes);
+    // Ángulo del centro del segmento objetivo (en coordenadas de la rueda)
+    // El segmento targetIndex va de targetIndex * segmentAngle a (targetIndex + 1) * segmentAngle
+    const segmentStart = targetIndex * segmentAngle;
+    const segmentEnd = (targetIndex + 1) * segmentAngle;
+    const segmentCenter = segmentStart + segmentAngle / 2;
     
-    // Verificar inmediatamente que el ángulo calculado produce el índice correcto
-    const verificationIndex = calculateWinnerIndexFromAngle(baseTargetAngle, prizes);
-    if (verificationIndex !== winnerIndex) {
-      console.error('❌ ERROR: El ángulo calculado no produce el índice esperado');
-      console.error('   Índice esperado:', winnerIndex, 'Índice verificado:', verificationIndex);
-      console.error('   Ángulo base:', baseTargetAngle);
-      
-      // Ajuste de emergencia - buscar un ángulo que funcione
-      let adjustedAngle = baseTargetAngle;
-      let attempts = 0;
-      while (calculateWinnerIndexFromAngle(adjustedAngle, prizes) !== winnerIndex && attempts < 10) {
-        adjustedAngle += 0.01; // Pequeño ajuste incremental
-        attempts++;
-      }
-      
-      if (calculateWinnerIndexFromAngle(adjustedAngle, prizes) === winnerIndex) {
-        console.log('✅ Ángulo ajustado correctamente después de', attempts, 'intentos');
-        baseTargetAngle = adjustedAngle;
-      }
-    }
+    // Agregar variación aleatoria dentro del segmento para que se vea más natural
+    // Usar 60% del ancho del segmento como rango de variación (dejando 20% de margen en cada lado)
+    const variationRange = segmentAngle * 0.6; // 60% del segmento
+    const randomOffset = (Math.random() - 0.5) * variationRange; // Entre -30% y +30% del segmento
+    const targetSegmentCenter = segmentCenter + randomOffset;
     
-    // Calcular vueltas completas
-    const minTurns = 3;
-    const maxTurns = 7;
-    const numTurns = minTurns + Math.random() * (maxTurns - minTurns);
-    const targetAngle = baseTargetAngle + numTurns * (Math.PI * 2);
+    // Convertir a ángulo de la rueda (donde el puntero apunta hacia abajo)
+    // El puntero está en Math.PI * 1.5 (270 grados / abajo)
+    // Para que el punto del segmento quede bajo el puntero, la rueda debe estar rotada así:
+    const baseTargetAngle = Math.PI * 1.5 - targetSegmentCenter;
+    
+    // Normalizar al rango [0, 2π]
+    let normalizedBaseTarget = ((baseTargetAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    
+    // 3. AGREGAR VUELTAS EXTRAS para que se vea bonito
+    const vueltasExtras = 3 + Math.floor(Math.random() * 2); // 3 o 4 vueltas
+    
+    // 4. CALCULAR GIRO RELATIVO desde el ángulo actual
+    // Queremos ir desde angle hasta normalizedBaseTarget + vueltasExtras * 2π
+    const currentAngleNormalized = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    
+    // Calcular la diferencia angular más corta hacia el objetivo
+    let angleDiff = normalizedBaseTarget - currentAngleNormalized;
+    while (angleDiff < 0) angleDiff += Math.PI * 2;
+    
+    // Agregar las vueltas extras
+    const angleToTravel = vueltasExtras * (Math.PI * 2) + angleDiff;
+    
+    // El ángulo final objetivo
+    const targetAngle = angle + angleToTravel;
     targetAngleRef.current = targetAngle;
     
-    // VERIFICACIÓN FINAL
-    const finalVerificationIndex = calculateWinnerIndexFromAngle(targetAngle, prizes);
-    console.log('🔍 Verificación final - Índice desde ángulo objetivo:', finalVerificationIndex, 
-                'debería ser:', winnerIndex, 
-                '¿Coincide?', finalVerificationIndex === winnerIndex);
+    console.log('🔧 Cálculo de giro:', {
+      anguloActual: currentAngleNormalized.toFixed(3),
+      anguloObjetivoBase: normalizedBaseTarget.toFixed(3),
+      diferencia: angleDiff.toFixed(3),
+      vueltasExtras: vueltasExtras,
+      distanciaTotal: angleToTravel.toFixed(3)
+    });
+
+    // 5. CALCULAR VELOCIDAD INICIAL para recorrer esa distancia
+    setWinner(null);
     
-    // Calcular distancia angular hasta el objetivo
-    let angleToTravel = targetAngle - angle;
+    // Calcular velocidad inicial óptima usando simulación física
+    const optimalVelocity = calculateOptimalVelocity(angleToTravel);
+    const initialVelocity = -optimalVelocity; // Negativo para giro horario
     
-    // Normalizar la diferencia al rango más corto
-    while (angleToTravel > Math.PI) angleToTravel -= Math.PI * 2;
-    while (angleToTravel < -Math.PI) angleToTravel += Math.PI * 2;
+    console.log('🔧 Velocidad calculada:', {
+      velocidad: optimalVelocity.toFixed(3),
+      distanciaAngular: angleToTravel.toFixed(3)
+    });
     
-    // Asegurar giro positivo (hacia adelante) con vueltas mínimas
-    if (angleToTravel < minTurns * Math.PI * 2) {
-      angleToTravel += Math.PI * 2 * Math.ceil(minTurns);
-    }
+    // Actualizar refs inmediatamente
+    velocityRef.current = initialVelocity;
+    angleRef.current = angle;
     
-    // Calcular velocidad inicial con método más preciso
-    const initialVelocity = calculateOptimalVelocity(angleToTravel);
-    
+    // Inicializar el seguimiento de segmentos
     if (prizes.length > 0) {
       const sliceAngle = (Math.PI * 2) / prizes.length;
       const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -350,20 +343,12 @@ export const useWheelAnimation = (prizes) => {
     } else {
       lastSliceRef.current = 0;
     }
-    lastTickAngleRef.current = angle;
     
-    setWinner(null);
-    setVelocity(-initialVelocity); // Negativo para giro horario
+    // Actualizar estado (esto disparará el useEffect que inicia la animación)
+    setVelocity(initialVelocity);
     setSpinning(true);
-    
-    console.log('🎯 Iniciando giro:', {
-      premioObjetivo: winnerPrizeName,
-      indiceObjetivo: winnerIndex,
-      velocidad: initialVelocity,
-      distanciaAngular: angleToTravel,
-      vueltas: numTurns
-    });
-  }, [spinning, angle, stopAnimation, initializeAudio, prizes, calculateOptimalVelocity]);
+    lastTimeRef.current = null;
+  }, [spinning, angle, prizes, initializeAudio, stopAnimation, animate, calculateAngleForIndex, calculateOptimalVelocity]);
 
   return { 
     angle, 

@@ -2,8 +2,8 @@ export const CONFIG = {
     PHYSICS: {
       FRICTION: 0.8,
       STOP_THRESHOLD: 0.8,
-      MIN_VELOCITY: 8,
-      MAX_VELOCITY: 16,
+      MIN_VELOCITY: 6,
+      MAX_VELOCITY: 35,
       TICK_INTERVAL: 0.15
     },
     WHEEL: {
@@ -18,7 +18,7 @@ export const CONFIG = {
       }
     },
     POINTER: {
-        BEND_INTENSITY: 20, // Intensidad máxima del bend
+        BEND_INTENSITY: 15, // Intensidad máxima del bend
         ANIMATION_INTERVAL: 16, // ~60fps
         DAMPING: 0.7, // Amortiguación del retorno
         MIN_VELOCITY: 0.1 // Velocidad mínima para activar el efecto

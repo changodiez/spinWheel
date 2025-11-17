@@ -163,12 +163,14 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.arc(0, 0, radius, startAngle, endAngle);
       ctx.closePath();
 
+      // Siempre usar el color original del segmento
+      ctx.fillStyle = segmentColor;
+      
       if (isWinner) {
-        ctx.fillStyle = CONFIG.WHEEL.COLORS.WINNER_GLOW;
-        ctx.shadowColor = CONFIG.WHEEL.COLORS.WINNER_GLOW;
-        ctx.shadowBlur = 20;
+        // Aplicar glow de neon del mismo color del segmento
+        ctx.shadowColor = segmentColor;
+        ctx.shadowBlur = 25;
       } else {
-        ctx.fillStyle = segmentColor;
         ctx.shadowBlur = 0;
       }
 
