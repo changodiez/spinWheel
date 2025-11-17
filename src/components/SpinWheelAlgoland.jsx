@@ -37,6 +37,7 @@ const SpinWheelAlgoland = () => {
   const wsRef = useRef(null);
   
   // Normalizar premios y filtrar los que tienen cantidad > 0
+  // EXCEPCIÓN: PeraWallet siempre se muestra aunque tenga cantidad 0
   const availablePrizes = useMemo(() => {
     return prizes
       .map(prize => {
@@ -49,7 +50,13 @@ const SpinWheelAlgoland = () => {
           quantity: typeof prize.quantity === 'number' ? prize.quantity : 0
         };
       })
-      .filter(prize => prize.quantity > 0); // Solo premios con cantidad > 0
+      .filter(prize => {
+        // Filtrar premios con cantidad 0, EXCEPTO PeraWallet que siempre se muestra
+        if (prize.name === 'PeraWallet') {
+          return true; // PeraWallet siempre visible
+        }
+        return prize.quantity > 0; // Otros premios solo si tienen cantidad > 0
+      });
   }, [prizes]);
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(availablePrizes);

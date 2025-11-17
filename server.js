@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { readdirSync } from 'fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,20 +27,65 @@ app.use('/spinWheel/assets', express.static(join(docsPath, 'assets'), {
 app.use(express.static(docsPath));
 app.use(express.json());
 
-// Estado de los premios (estructura: { name: string, quantity: number })
-let prizes = [
-  { name: "Tote", quantity: 10 },
-  { name: "Sticker", quantity: 10 },
-  { name: "Cool Cap", quantity: 10 },
-  { name: "Tattoo", quantity: 10 },
-  { name: "Socks", quantity: 10 },
-  { name: "T-Shirt", quantity: 10 },
-  { name: "Mug", quantity: 10 },
-  { name: "Label", quantity: 10 },
-  { name: "PeraWallet", quantity: 10 },
-  { name: "Pin", quantity: 10 },
-  { name: "Lanyard", quantity: 10 }
-];
+// Ruta del archivo JSON de premios
+const PRIZES_FILE = join(__dirname, 'prizes.json');
+
+// Función para cargar premios desde JSON
+function loadPrizes() {
+  try {
+    if (existsSync(PRIZES_FILE)) {
+      const data = readFileSync(PRIZES_FILE, 'utf8');
+      const loaded = JSON.parse(data);
+      console.log('✅ Premios cargados desde prizes.json');
+      return loaded;
+    } else {
+      console.log('⚠️ No se encontró prizes.json, usando valores por defecto');
+      return [
+        { name: "Tote", quantity: 10 },
+        { name: "Sticker", quantity: 10 },
+        { name: "Cool Cap", quantity: 10 },
+        { name: "Tattoo", quantity: 10 },
+        { name: "Socks", quantity: 10 },
+        { name: "T-Shirt", quantity: 10 },
+        { name: "Mug", quantity: 10 },
+        { name: "Label", quantity: 10 },
+        { name: "PeraWallet", quantity: 10 },
+        { name: "Pin", quantity: 10 },
+        { name: "Lanyard", quantity: 10 }
+      ];
+    }
+  } catch (error) {
+    console.error('❌ Error al cargar premios:', error);
+    return [
+      { name: "Tote", quantity: 10 },
+      { name: "Sticker", quantity: 10 },
+      { name: "Cool Cap", quantity: 10 },
+      { name: "Tattoo", quantity: 10 },
+      { name: "Socks", quantity: 10 },
+      { name: "T-Shirt", quantity: 10 },
+      { name: "Mug", quantity: 10 },
+      { name: "Label", quantity: 10 },
+      { name: "PeraWallet", quantity: 10 },
+      { name: "Pin", quantity: 10 },
+      { name: "Lanyard", quantity: 10 }
+    ];
+  }
+}
+
+// Función para guardar premios en JSON
+function savePrizes(prizesToSave) {
+  try {
+    writeFileSync(PRIZES_FILE, JSON.stringify(prizesToSave, null, 2), 'utf8');
+    console.log('💾 Premios guardados en prizes.json');
+    return true;
+  } catch (error) {
+    console.error('❌ Error al guardar premios:', error);
+    return false;
+  }
+}
+
+// Estado de los premios (cargado desde JSON)
+let prizes = loadPrizes();
 
 let clients = [];
 
@@ -59,6 +104,7 @@ wss.on('connection', (ws, req) => {
       switch (data.type) {
         case 'update_prizes':
           prizes = data.prizes;
+          savePrizes(prizes); // Guardar en JSON
           broadcast({ type: 'prizes_update', prizes });
           break;
         case 'update_prize_quantity':
@@ -73,6 +119,7 @@ wss.on('connection', (ws, req) => {
               name: typeof prizes[prizeIndex] === 'string' ? prizes[prizeIndex] : prizes[prizeIndex].name,
               quantity: data.quantity
             };
+            savePrizes(prizes); // Guardar en JSON
             broadcast({ type: 'prizes_update', prizes });
           }
           break;
@@ -92,6 +139,7 @@ wss.on('connection', (ws, req) => {
                 name: prizeName,
                 quantity: currentQuantity - 1
               };
+              savePrizes(prizes); // Guardar en JSON después de decrementar
               broadcast({ type: 'prizes_update', prizes });
               console.log(`✅ Premio ${prizeName} decrementado. Cantidad restante: ${prizes[decPrizeIndex].quantity}`);
             }
@@ -121,6 +169,7 @@ app.get('/admin', (req, res) => res.sendFile(join(docsPath, 'admin.html')));
 app.get('/api/prizes', (req, res) => res.json(prizes));
 app.post('/api/prizes', (req, res) => {
   prizes = req.body.prizes;
+  savePrizes(prizes); // Guardar en JSON
   broadcast({ type: 'prizes_update', prizes });
   res.json({ success: true });
 });

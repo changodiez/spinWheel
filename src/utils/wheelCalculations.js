@@ -42,9 +42,28 @@ const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {
   
   const weights = availablePrizes.map(prize => {
     const prizeName = typeof prize === 'string' ? prize : prize.name;
+    const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+    
+    // Si es PeraWallet y tiene cantidad 0, peso = 0 (no puede salir)
+    if (prizeName === 'PeraWallet' && prizeQuantity === 0) {
+      return 0;
+    }
+    
+    // Usar el peso configurado o 1.0 por defecto
     return PRIZE_WEIGHTS[prizeName] || 1.0;
   });
+  
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  
+  // Si el peso total es 0 (todos los premios tienen peso 0), evitar división por cero
+  if (totalWeight === 0) {
+    console.warn('⚠️ Todos los premios tienen peso 0, usando pesos uniformes');
+    return {
+      probabilities: weights.map(() => 1.0 / weights.length),
+      prizes: availablePrizes
+    };
+  }
+  
   return {
     probabilities: weights.map(w => w / totalWeight),
     prizes: availablePrizes
