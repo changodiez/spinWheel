@@ -108,7 +108,7 @@
   position: relative;
   overflow: visible !important;
   display: block;
-  margin: 0 auto;
+  margin: 40px auto 0;
 }
 
 .wheel-container canvas {
@@ -121,25 +121,6 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease-out;
-}
-
-/* Indicador de conexión */
-.connection-indicator {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 18px;
-  font-weight: 600;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 
@@ -156,54 +137,36 @@
 }
 
 .spin-button.tv-button {
-  padding: 2.42vh 7.7vw; /* 10% más grande: 2.2vh*1.1=2.42vh, 7vw*1.1=7.7vw */
-  min-height: 9.9vh; /* 10% más grande: 9vh*1.1=9.9vh */
-  min-width: 550px; /* 10% más grande: 500px*1.1=550px */
-  margin-top: 60px; /* Bajar el botón 60px */
+  margin-top: 85px; /* Bajar el botón 85px (60px + 25px) */
   background: transparent;
   border: none;
-  border-radius: 999px;
-  color: #ffffff;
-  font-family: 'Minecrafter', 'Press Start 2P', sans-serif;
-  font-size: clamp(28.6px, 4.4vh, 77px); /* 10% más grande: 26px*1.1=28.6px, 4vh*1.1=4.4vh, 70px*1.1=77px */
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 0.1s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+  display: inline-block;
   position: relative;
-  overflow: visible;
-  box-shadow: 
-    0 0 20px rgba(0, 255, 255, 0.6),
-    0 0 40px rgba(0, 255, 255, 0.4),
-    0 0 60px rgba(0, 255, 255, 0.3),
-    0 0 80px rgba(0, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.1s ease;
 }
 
 .spin-button.tv-button .button-bg-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 999px;
-  z-index: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
   pointer-events: none;
 }
 
-.spin-button.tv-button:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: scale(1.02);
-  box-shadow: 
-    0 0 30px rgba(0, 255, 255, 0.8),
-    0 0 60px rgba(0, 255, 255, 0.6),
-    0 0 90px rgba(0, 255, 255, 0.4),
-    0 0 120px rgba(0, 255, 255, 0.3);
-}
-
 .spin-button.tv-button .button-text {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
+  font-family: 'Minecrafter', 'Press Start 2P', sans-serif;
+  font-size: clamp(28.6px, 4.4vh, 77px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
   -webkit-text-stroke: 2px #000000;
   text-stroke: 2px #000000;
   text-shadow: 
@@ -216,31 +179,6 @@
 
 .spin-button.spinning {
   cursor: not-allowed;
-  transform: none;
-  filter: brightness(0.95);
-  box-shadow: 
-    0 0 20px rgba(0, 255, 255, 0.6),
-    0 0 40px rgba(0, 255, 255, 0.4),
-    0 0 60px rgba(0, 255, 255, 0.3),
-    0 0 80px rgba(0, 255, 255, 0.2);
-  animation: cyanGlow 2s ease-in-out infinite;
-}
-
-@keyframes cyanGlow {
-  0%, 100% {
-    box-shadow: 
-      0 0 20px rgba(0, 255, 255, 0.6),
-      0 0 40px rgba(0, 255, 255, 0.4),
-      0 0 60px rgba(0, 255, 255, 0.3),
-      0 0 80px rgba(0, 255, 255, 0.2);
-  }
-  50% {
-    box-shadow: 
-      0 0 30px rgba(0, 255, 255, 0.8),
-      0 0 60px rgba(0, 255, 255, 0.6),
-      0 0 90px rgba(0, 255, 255, 0.5),
-      0 0 120px rgba(0, 255, 255, 0.4);
-  }
 }
 
 .spin-button.spinning .button-text {
