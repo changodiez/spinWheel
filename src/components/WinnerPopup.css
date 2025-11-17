@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 0; /* Debajo de la rueda dentro del mismo contexto */
+  z-index: 1000; /* Por encima de todo para capturar todos los clicks */
   overflow: hidden;
   cursor: pointer;
   animation: fadeIn 0.4s ease-out forwards;

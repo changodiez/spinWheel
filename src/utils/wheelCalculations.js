@@ -7,24 +7,24 @@ export const generateColor = (index, total, prizeName) => {
   
   // Colores basados en la imagen de la ruleta (11 segmentos en orden horario desde arriba)
   const baseColors = [
-    '#FFEB3B',  // 1. Bright Yellow (amarillo brillante)
-    '#20B2AA',  // 2. Teal (verde azulado)
-    '#DDA0DD',  // 3. Light Lavender (lavanda claro)
-    '#4169E1',  // 4. Royal Blue (azul real)
-    '#FF8C00',  // 5. Bright Orange (naranja brillante)
-    '#50C878',  // 6. Emerald Green (verde esmeralda)
-    '#FF1493',  // 7. Hot Pink (rosa fucsia)
-    '#00CED1',  // 8. Bright Cyan (cian brillante)
-    '#32CD32',  // 9. Lime Green (verde lima)
-    '#FFB6C1',  // 10. Light Pink (rosa claro)
-    '#9370DB'   // 11. Medium Purple (morado medio)
+    '#ffee4e',  // 1. Bright Yellow (amarillo brillante)
+    '#1ccac5',  // 2. Teal (verde azulado)
+    '#acabfa',  // 3. Light Lavender (lavanda claro)
+    '#2d2df0',  // 4. Royal Blue (azul real)
+    '#ff7e47',  // 5. Bright Orange (naranja brillante)
+    '#05dc95',  // 6. Emerald Green (verde esmeralda)
+    '#ff4f7d',  // 7. Hot Pink (rosa fucsia)
+    '#00caf8',  // 8. Bright Cyan (cian brillante)
+    '#9ed700',  // 9. Lime Green (verde lima)
+    '#fc86bf',  // 10. Light Pink (rosa claro)
+    '#8947b6'   // 11. Medium Purple (morado medio)
   ];
   
   return baseColors[index % baseColors.length];
 };
 
 const PRIZE_WEIGHTS = {
-  'PeraWallet': 0.3, // PeraWallet tiene 30% de probabilidad comparado con otros premios
+  'PeraWallet': 0.4, // PeraWallet tiene 30% de probabilidad comparado con otros premios
 };
 
 const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {

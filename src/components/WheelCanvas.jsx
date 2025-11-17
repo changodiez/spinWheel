@@ -154,8 +154,11 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       const endAngle = startAngle + sliceAngle;
       const isWinner = index === winnerIndex;
 
+      // Extraer nombre del premio (puede ser string o objeto)
+      const prizeName = typeof prize === 'string' ? prize : prize.name;
+
       // Color del segmento
-      const segmentColor = generateColor(index, prizes.length, prize);
+      const segmentColor = generateColor(index, prizes.length, prizeName);
 
       // Segmento principal
       ctx.beginPath();
@@ -187,7 +190,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
       ctx.translate(radius * 0.9, 0);          
       ctx.rotate(Math.PI / 2);                 
 
-      const icon = iconImages[prize];
+      const icon = iconImages[prizeName];
       if (icon && icon.complete) {
         const iconSize = Math.min(165, 250);
         ctx.drawImage(icon, -iconSize / 2, 2, iconSize, iconSize);
@@ -196,7 +199,7 @@ const WheelCanvas = memo(({ angle, prizes, winnerIndex, size }) => {
         ctx.textBaseline = "middle";
         ctx.shadowColor = "#000000";
         ctx.shadowBlur = 18;
-        ctx.fillText(prize, 0, 0);
+        ctx.fillText(prizeName, 0, 0);
       }
       ctx.restore();
 

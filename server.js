@@ -27,10 +27,19 @@ app.use('/spinWheel/assets', express.static(join(docsPath, 'assets'), {
 app.use(express.static(docsPath));
 app.use(express.json());
 
-// Estado de los premios
+// Estado de los premios (estructura: { name: string, quantity: number })
 let prizes = [
-  "Tote", "Sticker", "Cool Cap", "Tattoo", "Socks", "T-Shirt", "Mug", "Label", "PeraWallet", "Pin", "Lanyard"
-
+  { name: "Tote", quantity: 10 },
+  { name: "Sticker", quantity: 10 },
+  { name: "Cool Cap", quantity: 10 },
+  { name: "Tattoo", quantity: 10 },
+  { name: "Socks", quantity: 10 },
+  { name: "T-Shirt", quantity: 10 },
+  { name: "Mug", quantity: 10 },
+  { name: "Label", quantity: 10 },
+  { name: "PeraWallet", quantity: 10 },
+  { name: "Pin", quantity: 10 },
+  { name: "Lanyard", quantity: 10 }
 ];
 
 let clients = [];
@@ -51,6 +60,42 @@ wss.on('connection', (ws, req) => {
         case 'update_prizes':
           prizes = data.prizes;
           broadcast({ type: 'prizes_update', prizes });
+          break;
+        case 'update_prize_quantity':
+          // Actualizar cantidad de un premio específico
+          const prizeIndex = prizes.findIndex(p => {
+            const pName = typeof p === 'string' ? p : p.name;
+            const dataName = typeof data.prize === 'string' ? data.prize : data.prize.name;
+            return pName === dataName;
+          });
+          if (prizeIndex !== -1) {
+            prizes[prizeIndex] = {
+              name: typeof prizes[prizeIndex] === 'string' ? prizes[prizeIndex] : prizes[prizeIndex].name,
+              quantity: data.quantity
+            };
+            broadcast({ type: 'prizes_update', prizes });
+          }
+          break;
+        case 'decrement_prize':
+          // Decrementar cantidad cuando se gana un premio
+          const decPrizeIndex = prizes.findIndex(p => {
+            const pName = typeof p === 'string' ? p : p.name;
+            return pName === data.prizeName;
+          });
+          if (decPrizeIndex !== -1) {
+            const prize = prizes[decPrizeIndex];
+            const prizeName = typeof prize === 'string' ? prize : prize.name;
+            const currentQuantity = typeof prize === 'string' ? 0 : (prize.quantity || 0);
+            
+            if (currentQuantity > 0) {
+              prizes[decPrizeIndex] = {
+                name: prizeName,
+                quantity: currentQuantity - 1
+              };
+              broadcast({ type: 'prizes_update', prizes });
+              console.log(`✅ Premio ${prizeName} decrementado. Cantidad restante: ${prizes[decPrizeIndex].quantity}`);
+            }
+          }
           break;
         case 'spin_wheel':
           broadcast({ type: 'spin_wheel' });

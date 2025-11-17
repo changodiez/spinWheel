@@ -51,23 +51,28 @@
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(15px);
             border-radius: 24px;
-            padding: 2rem;
+            padding: 1rem;
             border: 2px solid rgba(14, 230, 230, 0.5);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 1;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
         }
         
         .header h1 {
             font-family: 'Minecrafter', monospace;
             color: #0ee6e6;
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+            font-size: 1.2rem;
             letter-spacing: 0.1em;
         }
         
@@ -75,12 +80,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
             background: rgba(0, 0, 0, 0.5);
             border: 2px solid rgba(14, 230, 230, 0.3);
+            font-size: 0.85rem;
         }
         
         .status-dot {
@@ -96,36 +102,62 @@
         
         .section {
             background: rgba(0, 0, 0, 0.4);
-            padding: 1.5rem;
-            border-radius: 16px;
-            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
             border: 2px solid rgba(14, 230, 230, 0.3);
+            flex-shrink: 0;
         }
         
         .section h2 {
             font-family: 'Minecrafter', monospace;
             color: #0ee6e6;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
             letter-spacing: 0.05em;
+        }
+        
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+        }
+        
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: rgba(14, 230, 230, 0.5);
+            border-radius: 3px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(14, 230, 230, 0.7);
         }
         
         .add-prize {
             display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
         
         .add-prize input {
             flex: 1;
-            padding: 0.9rem;
+            padding: 0.6rem;
             border: 2px solid rgba(14, 230, 230, 0.3);
-            border-radius: 10px;
+            border-radius: 8px;
             background: rgba(0, 0, 0, 0.6);
             color: #ffffff;
             font-family: 'Minecrafter', monospace;
-            font-size: 0.9rem;
-            min-height: 48px;
+            font-size: 0.85rem;
+            min-height: 40px;
             transition: all 0.3s ease;
         }
 
@@ -140,15 +172,16 @@
         }
         
         .add-prize button {
-            padding: 0.9rem 1.5rem;
+            padding: 0.6rem 1rem;
             background: linear-gradient(135deg, #10b981, #059669);
             border: 2px solid #10b981;
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
             font-family: 'Minecrafter', monospace;
             font-weight: bold;
             cursor: pointer;
-            min-height: 48px;
+            min-height: 40px;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
         }
 
@@ -164,40 +197,44 @@
         .prizes-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            max-height: 50vh;
-            overflow-y: auto;
-        }
-
-        .prizes-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .prizes-list::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
-
-        .prizes-list::-webkit-scrollbar-thumb {
-            background: rgba(14, 230, 230, 0.5);
-            border-radius: 4px;
-        }
-
-        .prizes-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(14, 230, 230, 0.7);
+            gap: 0.5rem;
         }
         
         .prize-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 0.5rem;
+            padding: 0.6rem;
             background: rgba(14, 230, 230, 0.1);
-            border-radius: 12px;
+            border-radius: 8px;
             border: 2px solid rgba(14, 230, 230, 0.3);
             transition: all 0.3s ease;
             cursor: move;
             user-select: none;
+        }
+
+        .prize-quantity {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .prize-quantity input {
+            width: 60px;
+            padding: 0.4rem;
+            border: 2px solid rgba(14, 230, 230, 0.3);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            font-family: 'Minecrafter', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .prize-quantity input:focus {
+            outline: none;
+            border-color: #0ee6e6;
+            background: rgba(0, 0, 0, 0.8);
         }
 
         .prize-item:hover {
@@ -215,67 +252,36 @@
             background: rgba(14, 230, 230, 0.25);
         }
         
-        .prize-number {
-            background: linear-gradient(135deg, #0ee6e6, #04b1ff);
-            color: #000000;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-        
         .prize-name {
             flex: 1;
             font-family: 'Minecrafter', monospace;
-            font-size: 1rem;
+            font-size: 0.9rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             color: #ffffff;
+            min-width: 0;
         }
         
-        .delete-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border: 2px solid #ef4444;
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            pointer-events: auto;
-        }
-
-        .delete-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            transform: scale(1.1);
-        }
-
-        .delete-btn:active:not(:disabled) {
-            transform: scale(0.95);
-        }
         
         .action-buttons {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            margin-top: 0.5rem;
         }
         
         .action-btn {
             flex: 1;
-            padding: 1rem;
-            border: 3px solid;
-            border-radius: 12px;
+            padding: 0.7rem;
+            border: 2px solid;
+            border-radius: 8px;
             color: white;
             font-family: 'Minecrafter', monospace;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            min-height: 52px;
+            font-size: 0.85rem;
+            min-height: 44px;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -304,6 +310,10 @@
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             border-color: #3b82f6;
         }
+        
+        .save-btn::before {
+            content: '💾 ';
+        }
 
         .save-btn:hover:not(:disabled) {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -316,17 +326,18 @@
         
         .info {
             text-align: center;
-            margin-top: 2rem;
-            padding: 1rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
             background: rgba(14, 230, 230, 0.1);
-            border-radius: 12px;
+            border-radius: 8px;
             border: 2px solid rgba(14, 230, 230, 0.3);
+            flex-shrink: 0;
         }
 
         .info p {
             font-family: 'Minecrafter', monospace;
-            font-size: 0.85rem;
-            margin: 0.5rem 0;
+            font-size: 0.75rem;
+            margin: 0.25rem 0;
         }
 
         .info strong {
@@ -371,20 +382,22 @@
 
 
 
-        <div class="section">
-            <h2>🎯 Premios Actuales (<span id="prizesCount">0</span>)</h2>
-            <div class="prizes-list" id="prizesList"></div>
-        </div>
-        <div class="section">
-            <h2>➕ Agregar Premio</h2>
-            <div class="add-prize">
-                <input type="text" id="newPrizeInput" placeholder="Nombre del premio..." autocomplete="off">
-                <button onclick="addPrize()">Agregar</button>
+        <div class="scrollable-content">
+            <div class="section">
+                <h2>Premios Actuales (<span id="prizesCount">0</span>)</h2>
+                <div class="prizes-list" id="prizesList"></div>
             </div>
-        </div>
-        <div class="action-buttons">
-            <button id="spinBtn" class="action-btn spin-btn" onclick="spinWheel()">🎡 Girar Ruleta</button>
-            <button id="saveBtn" class="action-btn save-btn" onclick="savePrizes()">💾 Guardar</button>
+            <div class="section">
+                <h2>Agregar Premio</h2>
+                <div class="add-prize">
+                    <input type="text" id="newPrizeInput" placeholder="Nombre del premio..." autocomplete="off">
+                    <button onclick="addPrize()">Agregar</button>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="spinBtn" class="action-btn spin-btn" onclick="spinWheel()">Girar Ruleta</button>
+                <button id="saveBtn" class="action-btn save-btn" onclick="savePrizes()">Guardar</button>
+            </div>
         </div>
 
         <div class="info">
@@ -418,7 +431,16 @@
                         const data = JSON.parse(event.data);
                         
                         if (data.type === 'prizes_update') {
-                            prizes = data.prizes;
+                            // Normalizar premios a formato objeto
+                            prizes = data.prizes.map(p => {
+                                if (typeof p === 'string') {
+                                    return { name: p, quantity: 0 };
+                                }
+                                return {
+                                    name: p.name || p,
+                                    quantity: typeof p.quantity === 'number' ? p.quantity : 0
+                                };
+                            });
                             renderPrizes();
                         }
                     } catch (error) {
@@ -470,8 +492,11 @@
             const input = document.getElementById('newPrizeInput');
             const prizeName = input.value.trim();
             
-            if (prizeName && !prizes.includes(prizeName)) {
-                const newPrizes = [...prizes, prizeName];
+            if (prizeName && !prizes.some(p => {
+                const pName = typeof p === 'string' ? p : p.name;
+                return pName === prizeName;
+            })) {
+                const newPrizes = [...prizes, { name: prizeName, quantity: 0 }];
                 if (sendMessage({
                     type: 'update_prizes',
                     prizes: newPrizes
@@ -486,15 +511,30 @@
             }
         }
         
-        function removePrize(index) {
-            const newPrizes = prizes.filter((_, i) => i !== index);
+
+        function updatePrizeQuantity(index, newQuantity) {
+            const quantity = parseInt(newQuantity);
+            if (isNaN(quantity) || quantity < 0) {
+                // Restaurar valor anterior si es inválido
+                renderPrizes();
+                return;
+            }
+            
+            const prize = prizes[index];
+            const prizeName = typeof prize === 'string' ? prize : prize.name;
+            
             sendMessage({
-                type: 'update_prizes',
-                prizes: newPrizes
+                type: 'update_prize_quantity',
+                prize: prizeName,
+                quantity: quantity
             });
-            prizes = newPrizes;
+            
+            // Actualizar localmente
+            prizes[index] = {
+                name: prizeName,
+                quantity: quantity
+            };
             renderPrizes();
-            updateButtonsState();
         }
         
         function spinWheel() {
@@ -537,14 +577,26 @@
             }
             
             prizes.forEach((prize, index) => {
+                const prizeName = typeof prize === 'string' ? prize : prize.name;
+                const quantity = typeof prize === 'string' ? 0 : (prize.quantity || 0);
+                
                 const item = document.createElement('div');
                 item.className = 'prize-item';
                 item.draggable = true;
                 item.dataset.index = index;
                 item.innerHTML = `
-                    <div class="prize-number">${index + 1}</div>
-                    <div class="prize-name">${prize}</div>
-                    <button class="delete-btn" onclick="removePrize(${index})" onmousedown="event.stopPropagation()">🗑️</button>
+                    <div class="prize-name">${prizeName}</div>
+                    <div class="prize-quantity">
+                        <input 
+                            type="number" 
+                            min="0" 
+                            value="${quantity}" 
+                            onchange="updatePrizeQuantity(${index}, this.value)"
+                            onmousedown="event.stopPropagation()"
+                            onclick="event.stopPropagation()"
+                            placeholder="0"
+                        >
+                    </div>
                 `;
                 
                 // Event listeners para drag and drop

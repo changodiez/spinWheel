@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useWheelAnimation } from '../hooks/useWheelAnimation';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
@@ -11,9 +11,19 @@ import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
 import { selectWeightedWinner } from '../utils/wheelCalculations';
 import './SpinWheelAlgoland.css';
 
-// Premios fijos para GitHub Pages
+// Premios fijos para GitHub Pages (formato objeto para compatibilidad)
 const DEFAULT_PRIZES = [
-  "Tote", "Sticker", "Cool Cap", "Tattoo", "Socks", "T-Shirt", "Mug", "Label", "PeraWallet", "Pin", "Lanyard"
+  { name: "Tote", quantity: 10 },
+  { name: "Sticker", quantity: 10 },
+  { name: "Cool Cap", quantity: 10 },
+  { name: "Tattoo", quantity: 10 },
+  { name: "Socks", quantity: 10 },
+  { name: "T-Shirt", quantity: 10 },
+  { name: "Mug", quantity: 10 },
+  { name: "Label", quantity: 10 },
+  { name: "PeraWallet", quantity: 10 },
+  { name: "Pin", quantity: 10 },
+  { name: "Lanyard", quantity: 10 }
 ];
 
 const SpinWheelAlgoland = () => {
@@ -24,8 +34,25 @@ const SpinWheelAlgoland = () => {
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [cursorVisible, setCursorVisible] = useState(true);
+  const wsRef = useRef(null);
   
-  const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(prizes);
+  // Normalizar premios y filtrar los que tienen cantidad > 0
+  const availablePrizes = useMemo(() => {
+    return prizes
+      .map(prize => {
+        // Normalizar a formato objeto
+        if (typeof prize === 'string') {
+          return { name: prize, quantity: 1 }; // En modo demo, asumir cantidad 1
+        }
+        return {
+          name: prize.name || prize,
+          quantity: typeof prize.quantity === 'number' ? prize.quantity : 0
+        };
+      })
+      .filter(prize => prize.quantity > 0); // Solo premios con cantidad > 0
+  }, [prizes]);
+  
+  const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(availablePrizes);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -42,9 +69,20 @@ const SpinWheelAlgoland = () => {
 
   useEffect(() => {
     const handleGlobalClick = (e) => {
-      if (!spinning && 
-          prizes.length > 0 &&
-          !e.target.closest('.winner-popup-overlay')) {
+      // Si el popup está visible, permitir que se cierre (el popup maneja su propio cierre)
+      // pero NO iniciar un nuevo spin
+      if (showWinner) {
+        // El popup tiene su propio handler de cierre, solo necesitamos evitar iniciar un spin
+        return;
+      }
+      
+      // No hacer nada si se hace click en el popup
+      if (e.target.closest('.winner-popup-overlay')) {
+        return;
+      }
+      
+      // Permitir girar solo si no está girando y hay premios disponibles
+      if (!spinning && availablePrizes.length > 0) {
         startSpin();
       }
     };
@@ -54,7 +92,7 @@ const SpinWheelAlgoland = () => {
     return () => {
       document.removeEventListener('click', handleGlobalClick);
     };
-  }, [spinning, prizes.length, startSpin]); 
+  }, [spinning, prizes.length, startSpin, showWinner]); 
 
   useEffect(() => {
     const isGitHubPages = window.location.hostname.includes('github.io');
@@ -71,6 +109,7 @@ const SpinWheelAlgoland = () => {
 
   const connectToWebSocket = () => {
     const ws = new WebSocket('ws://localhost:3000');
+    wsRef.current = ws;
     
     ws.onopen = () => {
       console.log('Conectado al servidor WebSocket');
@@ -82,11 +121,22 @@ const SpinWheelAlgoland = () => {
         
         switch (data.type) {
           case 'prizes_update':
-            setPrizes(data.prizes);
+            // Normalizar premios que vienen del servidor
+            const normalizedPrizes = data.prizes.map(p => {
+              if (typeof p === 'string') {
+                return { name: p, quantity: 0 };
+              }
+              return {
+                name: p.name || p,
+                quantity: typeof p.quantity === 'number' ? p.quantity : 0
+              };
+            });
+            setPrizes(normalizedPrizes);
+            console.log('📦 Premios actualizados:', normalizedPrizes);
             break;
             
           case 'spin_wheel':
-            if (!spinning && prizes.length > 0) {
+            if (!spinning && availablePrizes.length > 0) {
               startSpin();
             }
             break;
@@ -108,6 +158,37 @@ const SpinWheelAlgoland = () => {
       }
     };
   };
+  
+  // Decrementar cantidad cuando se gana un premio
+  useEffect(() => {
+    if (!winner || isDemoMode) return;
+    
+    const winnerPrizeName = typeof winner.prize === 'string' ? winner.prize : winner.prize;
+    
+    // Enviar mensaje al servidor para decrementar
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'decrement_prize',
+        prizeName: winnerPrizeName
+      }));
+      console.log('📤 Decrementando premio:', winnerPrizeName);
+    } else {
+      // En modo demo, decrementar localmente
+      setPrizes(prevPrizes => {
+        return prevPrizes.map(prize => {
+          const prizeName = typeof prize === 'string' ? prize : prize.name;
+          if (prizeName === winnerPrizeName) {
+            const currentQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+            return {
+              name: prizeName,
+              quantity: Math.max(0, currentQuantity - 1)
+            };
+          }
+          return prize;
+        });
+      });
+    }
+  }, [winner, isDemoMode]);
 
   useEffect(() => {
     const computeWheelSize = () => {
@@ -265,15 +346,16 @@ const SpinWheelAlgoland = () => {
 
         <div className={`wheel-container ${showWinner ? 'hidden' : ''}`}>
           <WheelCanvas
+            key={availablePrizes.length} // Forzar re-render cuando cambian los premios disponibles
             angle={angle}
-            prizes={prizes}
+            prizes={availablePrizes}
             winnerIndex={winner?.index}
             size={wheelSize}
           />
 
           <FlickerPointer
             angle={angle}
-            prizes={prizes}
+            prizes={availablePrizes}
             wheelSize={wheelSize}
             velocity={velocity}
           />
