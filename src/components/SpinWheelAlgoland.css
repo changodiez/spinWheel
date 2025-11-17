@@ -55,6 +55,7 @@
   justify-content: space-between;
   padding: calc(5vh - 0px) 6vw 8vh; /* padding-top reducido 30px para subir todo el contenido */
   overflow: visible !important;
+  isolation: isolate; /* Crea un nuevo contexto de apilamiento */
 }
 
 .header {
@@ -101,7 +102,7 @@
   overflow: visible !important;
   filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3))
           drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
-        
+  z-index: 1; /* Dentro del contexto de spin-wheel-container */
 }
 
 .wheel-container .wheel-canvas-wrapper {
@@ -118,9 +119,10 @@
 }
 
 .wheel-container.hidden {
-  opacity: 0;
+  opacity: 0 !important;
   pointer-events: none;
   transition: opacity 0.3s ease-out;
+  display: flex !important; /* Sobrescribir la regla global .hidden { display: none; } */
 }
 
 
@@ -157,12 +159,12 @@
 
 .spin-button.tv-button .button-text {
   position: absolute;
-  top: 50%;
+  top: calc(50% + 5px);
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
   font-family: 'Minecrafter', 'Press Start 2P', sans-serif;
-  font-size: clamp(28.6px, 4.4vh, 77px);
+  font-size: clamp(24px, 3.8vh, 65px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #ffffff;
