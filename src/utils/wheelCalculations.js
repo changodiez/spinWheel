@@ -36,14 +36,16 @@ const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {
     });
   }
   
+  // Filtrar premios con peso 0 (cantidad 0) - estos NO pueden ser seleccionados
+  availablePrizes = availablePrizes.filter(prize => {
+    const prizeName = typeof prize === 'string' ? prize : prize.name;
+    const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+    return prizeQuantity > 0; // Solo incluir premios con cantidad > 0
+  });
+  
   const weights = availablePrizes.map(prize => {
     const prizeName = typeof prize === 'string' ? prize : prize.name;
     const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
-    
-    // Si es PeraWallet y tiene cantidad 0, peso = 0 (no puede salir)
-    if (prizeName === 'PeraWallet' && prizeQuantity === 0) {
-      return 0;
-    }
     
     // El peso es igual a la cantidad del premio
     return prizeQuantity;
@@ -84,8 +86,8 @@ export const selectWeightedWinner = (prizes, canSelectPeraWalletFn = null, showL
     }
   }
   
-  // Si se filtraron premios, encontrar el índice en el array original
-  if (canSelectPeraWalletFn && availablePrizes.length !== prizes.length) {
+  // Si se filtraron premios (premios con peso 0 fueron eliminados), mapear al índice original
+  if (availablePrizes.length !== prizes.length) {
     const selectedPrize = availablePrizes[selectedIndex];
     const selectedPrizeName = typeof selectedPrize === 'string' ? selectedPrize : selectedPrize.name;
     
