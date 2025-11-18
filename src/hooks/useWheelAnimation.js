@@ -220,10 +220,15 @@ export const useWheelAnimation = (prizes) => {
       
       console.log('🎯 Premio ganador (visual):', winnerPrizeName, 'índice:', finalIndex);
       
+      const winnerWinText = typeof winnerPrize === 'string' 
+        ? winnerPrize 
+        : (winnerPrize.winText || winnerPrizeName);
+      
       const winnerData = {
         prize: winnerPrizeName,
         index: finalIndex,
-        prizeObject: winnerPrize
+        prizeObject: winnerPrize,
+        winText: winnerWinText
       };
       
       setWinner(winnerData);

@@ -95,7 +95,7 @@ const WinnerPopup = ({ winner, onClose, autoCloseTime = 10000 }) => {
           </div>
 
           <div className="prize-container">
-            <p className="prize-name">{winner.prize}</p>
+            <p className="prize-name">{winner.winText || winner.prize}</p>
           </div>
         </div>
       </div>

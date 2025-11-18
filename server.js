@@ -41,17 +41,17 @@ function loadPrizes() {
     } else {
       console.log('⚠️ No se encontró prizes.json, usando valores por defecto');
       return [
-        { name: "Tote", quantity: 10 },
-        { name: "Sticker", quantity: 10 },
-        { name: "Cool Cap", quantity: 10 },
-        { name: "Tattoo", quantity: 10 },
-        { name: "Socks", quantity: 10 },
-        { name: "T-Shirt", quantity: 10 },
-        { name: "Mug", quantity: 10 },
-        { name: "Label", quantity: 10 },
-        { name: "PeraWallet", quantity: 10 },
-        { name: "Pin", quantity: 10 },
-        { name: "Lanyard", quantity: 10 }
+        { name: "Tote", quantity: 10, winText: "You win a shiny Tote bag" },
+        { name: "Sticker", quantity: 10, winText: "You win a sticky Sticker" },
+        { name: "Cool Cap", quantity: 10, winText: "You win a cool Cap" },
+        { name: "Tattoo", quantity: 10, winText: "You win a wild Tattoo" },
+        { name: "Socks", quantity: 10, winText: "You win magic Socks" },
+        { name: "T-Shirt", quantity: 10, winText: "You win an epic T-shirt" },
+        { name: "Mug", quantity: 10, winText: "You win a power Mug" },
+        { name: "Label", quantity: 10, winText: "You win a cool Tag" },
+        { name: "PeraWallet", quantity: 10, winText: "You win a Spin in Pera" },
+        { name: "Pin", quantity: 10, winText: "You win a funky Pin" },
+        { name: "Lanyard", quantity: 10, winText: "You win a cozy Lanyard" }
       ];
     }
   } catch (error) {

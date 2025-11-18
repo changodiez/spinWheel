@@ -11,19 +11,34 @@ import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
 import { selectWeightedWinner } from '../utils/wheelCalculations';
 import './SpinWheelAlgoland.css';
 
+// Mapeo de nombres de premios a textos de ganador
+const PRIZE_WIN_TEXTS = {
+  "Label": "You win a cool Tag",
+  "Mug": "You win a power Mug",
+  "Tote": "You win a shiny Tote bag",
+  "T-Shirt": "You win an epic T-shirt",
+  "Pin": "You win a funky Pin",
+  "Sticker": "You win a sticky Sticker",
+  "Cool Cap": "You win a cool Cap",
+  "Lanyard": "You win a cozy Lanyard",
+  "Tattoo": "You win a wild Tattoo",
+  "Socks": "You win magic Socks",
+  "PeraWallet": "You win a Spin in Pera"
+};
+
 // Premios fijos para GitHub Pages (formato objeto para compatibilidad)
 const DEFAULT_PRIZES = [
-  { name: "Tote", quantity: 10 },
-  { name: "Sticker", quantity: 10 },
-  { name: "Cool Cap", quantity: 10 },
-  { name: "Tattoo", quantity: 10 },
-  { name: "Socks", quantity: 10 },
-  { name: "T-Shirt", quantity: 10 },
-  { name: "Mug", quantity: 10 },
-  { name: "Label", quantity: 10 },
-  { name: "PeraWallet", quantity: 10 },
-  { name: "Pin", quantity: 10 },
-  { name: "Lanyard", quantity: 10 }
+  { name: "PeraWallet", quantity: 10, winText: "You win a Spin in Pera" },
+  { name: "Tote", quantity: 10, winText: "You win a shiny Tote bag" },
+  { name: "Sticker", quantity: 10, winText: "You win a sticky Sticker" },
+  { name: "Cool Cap", quantity: 10, winText: "You win a cool Cap" },
+  { name: "Tattoo", quantity: 10, winText: "You win a wild Tattoo" },
+  { name: "T-Shirt", quantity: 10, winText: "You win an epic T-shirt" },
+  { name: "Socks", quantity: 10, winText: "You win magic Socks" },
+  { name: "Mug", quantity: 10, winText: "You win a power Mug" },
+  { name: "Label", quantity: 10, winText: "You win a cool Tag" },
+  { name: "Pin", quantity: 10, winText: "You win a funky Pin" },
+  { name: "Lanyard", quantity: 10, winText: "You win a cozy Lanyard" }
 ];
 
 const SpinWheelAlgoland = () => {
@@ -43,11 +58,17 @@ const SpinWheelAlgoland = () => {
       .map(prize => {
         // Normalizar a formato objeto
         if (typeof prize === 'string') {
-          return { name: prize, quantity: 1 }; // En modo demo, asumir cantidad 1
+          return { 
+            name: prize, 
+            quantity: 1, // En modo demo, asumir cantidad 1
+            winText: PRIZE_WIN_TEXTS[prize] || prize
+          };
         }
+        const prizeName = prize.name || prize;
         return {
-          name: prize.name || prize,
-          quantity: typeof prize.quantity === 'number' ? prize.quantity : 0
+          name: prizeName,
+          quantity: typeof prize.quantity === 'number' ? prize.quantity : 0,
+          winText: prize.winText || PRIZE_WIN_TEXTS[prizeName] || prizeName
         };
       })
       .filter(prize => {
@@ -131,11 +152,17 @@ const SpinWheelAlgoland = () => {
             // Normalizar premios que vienen del servidor
             const normalizedPrizes = data.prizes.map(p => {
               if (typeof p === 'string') {
-                return { name: p, quantity: 0 };
+                return { 
+                  name: p, 
+                  quantity: 0,
+                  winText: PRIZE_WIN_TEXTS[p] || p
+                };
               }
+              const prizeName = p.name || p;
               return {
-                name: p.name || p,
-                quantity: typeof p.quantity === 'number' ? p.quantity : 0
+                name: prizeName,
+                quantity: typeof p.quantity === 'number' ? p.quantity : 0,
+                winText: p.winText || PRIZE_WIN_TEXTS[prizeName] || prizeName
               };
             });
             setPrizes(normalizedPrizes);

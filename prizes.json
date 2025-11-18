@@ -1,46 +1,57 @@
 [
   {
+    "name": "PeraWallet",
+    "quantity": 0,
+    "winText": "You win a Spin in Pera"
+  },
+  {
     "name": "Tote",
-    "quantity": 82
+    "quantity": 82,
+    "winText": "You win a shiny Tote bag"
   },
   {
     "name": "Sticker",
-    "quantity": 900
+    "quantity": 900,
+    "winText": "You win a sticky Sticker"
   },
   {
     "name": "Cool Cap",
-    "quantity": 559
+    "quantity": 559,
+    "winText": "You win a cool Cap"
   },
   {
     "name": "Tattoo",
-    "quantity": 260
-  },
-  {
-    "name": "Socks",
-    "quantity": 299
+    "quantity": 260,
+    "winText": "You win a wild Tattoo"
   },
   {
     "name": "T-Shirt",
-    "quantity": 230
+    "quantity": 230,
+    "winText": "You win an epic T-shirt"
+  },
+  {
+    "name": "Socks",
+    "quantity": 299,
+    "winText": "You win magic Socks"
   },
   {
     "name": "Mug",
-    "quantity": 70
+    "quantity": 70,
+    "winText": "You win a power Mug"
   },
   {
     "name": "Label",
-    "quantity": 15
-  },
-  {
-    "name": "PeraWallet",
-    "quantity": 0
+    "quantity": 15,
+    "winText": "You win a cool Tag"
   },
   {
     "name": "Pin",
-    "quantity": 249
+    "quantity": 249,
+    "winText": "You win a funky Pin"
   },
   {
     "name": "Lanyard",
-    "quantity": 50
+    "quantity": 50,
+    "winText": "You win a cozy Lanyard"
   }
 ]
