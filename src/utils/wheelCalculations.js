@@ -23,10 +23,6 @@ export const generateColor = (index, total, prizeName) => {
   return baseColors[index % baseColors.length];
 };
 
-const PRIZE_WEIGHTS = {
-  'PeraWallet': 0.4, // PeraWallet tiene 30% de probabilidad comparado con otros premios
-};
-
 const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {
   // Filtrar premios disponibles si hay una función de filtrado (ej: límites de PeraWallet)
   let availablePrizes = prizes;
@@ -49,8 +45,8 @@ const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {
       return 0;
     }
     
-    // Usar el peso configurado o 1.0 por defecto
-    return PRIZE_WEIGHTS[prizeName] || 1.0;
+    // El peso es igual a la cantidad del premio
+    return prizeQuantity;
   });
   
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -127,12 +123,13 @@ export const selectWeightedWinner = (prizes, canSelectPeraWalletFn = null, showL
     
     // Log detallado de todos los pesos (solo la primera vez o cuando cambian)
     if (showLogs && Math.random() < 0.1) { // Solo 10% de las veces para no saturar
-      console.log('📊 Pesos de premios:', availablePrizes.map((prize, i) => {
+      console.log('📊 Pesos de premios (basados en cantidad):', availablePrizes.map((prize, i) => {
         const prizeName = typeof prize === 'string' ? prize : prize.name;
-        const weight = PRIZE_WEIGHTS[prizeName] || 1.0;
+        const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
         return {
           premio: prizeName,
-          peso: weight,
+          cantidad: prizeQuantity,
+          peso: prizeQuantity,
           probabilidad: (probabilities[i] * 100).toFixed(2) + '%'
         };
       }));

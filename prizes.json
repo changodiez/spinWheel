@@ -26,8 +26,7 @@
   },
   {
     "name": "T-Shirt",
-    "quantity": 230,
-    "winText": "You win an epic T-shirt"
+    "quantity": 228
   },
   {
     "name": "Socks",
@@ -36,8 +35,7 @@
   },
   {
     "name": "Mug",
-    "quantity": 70,
-    "winText": "You win a power Mug"
+    "quantity": 69
   },
   {
     "name": "Label",

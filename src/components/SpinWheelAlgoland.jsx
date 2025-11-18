@@ -49,6 +49,7 @@ const SpinWheelAlgoland = () => {
   const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [cursorVisible, setCursorVisible] = useState(true);
+  const [decrementPaused, setDecrementPaused] = useState(false);
   const wsRef = useRef(null);
   
   // Normalizar premios y filtrar los que tienen cantidad > 0
@@ -193,9 +194,25 @@ const SpinWheelAlgoland = () => {
     };
   };
   
-  // Decrementar cantidad cuando se gana un premio
+  // Listener para la tecla "r" para pausar/reanudar el decremento
   useEffect(() => {
-    if (!winner || isDemoMode) return;
+    const handleKeyPress = (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        setDecrementPaused(prev => {
+          const newState = !prev;
+          console.log(newState ? '⏸️ Se detiene el decremento de los ítems.' : '▶️ Decremento reanudado');
+          return newState;
+        });
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Decrementar cantidad cuando se gana un premio (solo si no está pausado)
+  useEffect(() => {
+    if (!winner || isDemoMode || decrementPaused) return;
     
     const winnerPrizeName = typeof winner.prize === 'string' ? winner.prize : winner.prize;
     
@@ -222,7 +239,7 @@ const SpinWheelAlgoland = () => {
         });
       });
     }
-  }, [winner, isDemoMode]);
+  }, [winner, isDemoMode, decrementPaused]);
 
   useEffect(() => {
     const computeWheelSize = () => {
@@ -266,7 +283,8 @@ const SpinWheelAlgoland = () => {
       // Contador de resultados
       const counts = {};
       DEFAULT_PRIZES.forEach(prize => {
-        counts[prize] = 0;
+        const prizeName = typeof prize === 'string' ? prize : prize.name;
+        counts[prizeName] = 0;
       });
       
       console.log(`🎲 Simulando ${numSpins} tiros...`);
@@ -275,52 +293,60 @@ const SpinWheelAlgoland = () => {
       for (let i = 0; i < numSpins; i++) {
         const winnerIndex = selectWeightedWinner(DEFAULT_PRIZES, canSelectPeraWallet, false);
         const winnerPrize = DEFAULT_PRIZES[winnerIndex];
-        counts[winnerPrize]++;
+        const winnerPrizeName = typeof winnerPrize === 'string' ? winnerPrize : winnerPrize.name;
+        counts[winnerPrizeName]++;
       }
       
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
-      // Calcular probabilidades teóricas (usar el mismo peso que en wheelCalculations.js)
-      // Nota: Si cambias el peso en wheelCalculations.js, actualiza este valor también
-      const PRIZE_WEIGHTS = {
-        'PeraWallet': 0.4, // Debe coincidir con el valor en wheelCalculations.js
-      };
+      // Calcular probabilidades teóricas usando la cantidad como peso
       const totalWeight = DEFAULT_PRIZES.reduce((sum, prize) => {
-        const weight = PRIZE_WEIGHTS[prize] || 1.0;
-        return sum + weight;
+        const prizeName = typeof prize === 'string' ? prize : prize.name;
+        const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+        // Si es PeraWallet y tiene cantidad 0, peso = 0
+        if (prizeName === 'PeraWallet' && prizeQuantity === 0) {
+          return sum;
+        }
+        return sum + prizeQuantity;
       }, 0);
       
       // Mostrar resultados
       console.log(`\n✅ Simulación completada en ${duration}s\n`);
       console.log('📊 RESULTADOS DE LA SIMULACIÓN:');
       console.log('═'.repeat(90));
-      console.log(`${'Premio'.padEnd(20)} | ${'Teórico %'.padEnd(12)} | ${'Teórico #'.padEnd(12)} | ${'Simulado #'.padEnd(12)} | ${'Real %'.padEnd(10)} | ${'Diferencia'.padEnd(12)}`);
+      console.log(`${'Premio'.padEnd(20)} | ${'Cantidad'.padEnd(10)} | ${'Teórico %'.padEnd(12)} | ${'Teórico #'.padEnd(12)} | ${'Simulado #'.padEnd(12)} | ${'Real %'.padEnd(10)} | ${'Diferencia'.padEnd(12)}`);
       console.log('─'.repeat(90));
       
       DEFAULT_PRIZES.forEach(prize => {
-        const weight = PRIZE_WEIGHTS[prize] || 1.0;
-        const theoreticalProb = weight / totalWeight;
+        const prizeName = typeof prize === 'string' ? prize : prize.name;
+        const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+        // El peso es igual a la cantidad (0 si es PeraWallet con cantidad 0)
+        const weight = (prizeName === 'PeraWallet' && prizeQuantity === 0) ? 0 : prizeQuantity;
+        const theoreticalProb = totalWeight > 0 ? weight / totalWeight : 0;
         const theoreticalCount = theoreticalProb * numSpins;
-        const actualCount = counts[prize];
+        const actualCount = counts[prizeName] || 0;
         const actualPercent = (actualCount / numSpins * 100).toFixed(2);
         const theoreticalPercent = (theoreticalProb * 100).toFixed(2);
         const difference = actualCount - theoreticalCount;
-        const diffPercent = (difference / theoreticalCount * 100).toFixed(2);
+        const diffPercent = theoreticalCount > 0 ? (difference / theoreticalCount * 100).toFixed(2) : '0.00';
         
         console.log(
-          `${prize.padEnd(20)} | ${theoreticalPercent.padStart(6)}% | ${Math.round(theoreticalCount).toString().padStart(4)} | ${actualCount.toString().padStart(4)} | ${actualPercent.padStart(6)}% | ${difference >= 0 ? '+' : ''}${difference.toFixed(0).padStart(4)} (${diffPercent.padStart(6)}%)`
+          `${prizeName.padEnd(20)} | ${prizeQuantity.toString().padStart(8)} | ${theoreticalPercent.padStart(6)}% | ${Math.round(theoreticalCount).toString().padStart(4)} | ${actualCount.toString().padStart(4)} | ${actualPercent.padStart(6)}% | ${difference >= 0 ? '+' : ''}${difference.toFixed(0).padStart(4)} (${diffPercent.padStart(6)}%)`
         );
       });
       
       console.log('═'.repeat(90));
       console.log(`\n📈 Estadísticas:`);
       console.log(`   Total de tiros: ${numSpins}`);
-      console.log(`   PeraWallet: ${counts['PeraWallet']} veces (${(counts['PeraWallet'] / numSpins * 100).toFixed(2)}%)`);
-      const otherPrizesCount = numSpins - counts['PeraWallet'];
+      const peraWalletCount = counts['PeraWallet'] || 0;
+      console.log(`   PeraWallet: ${peraWalletCount} veces (${(peraWalletCount / numSpins * 100).toFixed(2)}%)`);
+      const otherPrizesCount = numSpins - peraWalletCount;
       const otherPrizesAvg = otherPrizesCount / (DEFAULT_PRIZES.length - 1);
       console.log(`   Otros premios promedio: ${otherPrizesAvg.toFixed(1)} veces por premio`);
-      console.log(`   Ratio PeraWallet vs Otros: 1:${(otherPrizesAvg / counts['PeraWallet']).toFixed(2)}`);
+      if (peraWalletCount > 0) {
+        console.log(`   Ratio PeraWallet vs Otros: 1:${(otherPrizesAvg / peraWalletCount).toFixed(2)}`);
+      }
       
       return counts;
     };
@@ -377,6 +403,13 @@ const SpinWheelAlgoland = () => {
           <img src={headerImg} alt="Header" className="header-img" />
           </h1>
         </div>
+
+        {decrementPaused && (
+          <div className="decrement-pause-indicator">
+            <span className="pause-icon">⏸️</span>
+            <span className="pause-text">Decremento pausado (Presiona R para reanudar)</span>
+          </div>
+        )}
 
         <div className={`wheel-container ${showWinner ? 'hidden' : ''}`}>
           <WheelCanvas
