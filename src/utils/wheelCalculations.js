@@ -36,19 +36,17 @@ const calculateProbabilities = (prizes, canSelectPeraWalletFn = null) => {
     });
   }
   
-  // Filtrar premios con peso 0 (cantidad 0) - estos NO pueden ser seleccionados
+  // Filtrar premios con cantidad 0 - estos NO pueden ser seleccionados
   availablePrizes = availablePrizes.filter(prize => {
     const prizeName = typeof prize === 'string' ? prize : prize.name;
     const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
-    return prizeQuantity > 0; // Solo incluir premios con cantidad > 0
+    return prizeQuantity > 0;
   });
   
+  // Asignar pesos fijos: todos peso 1, excepto PeraWallet que tiene peso 0.4
   const weights = availablePrizes.map(prize => {
     const prizeName = typeof prize === 'string' ? prize : prize.name;
-    const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
-    
-    // El peso es igual a la cantidad del premio
-    return prizeQuantity;
+    return prizeName === 'PeraWallet' ? 0.4 : 1;
   });
   
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -123,15 +121,15 @@ export const selectWeightedWinner = (prizes, canSelectPeraWalletFn = null, showL
       random: random.toFixed(4)
     });
     
-    // Log detallado de todos los pesos (solo la primera vez o cuando cambian)
-    if (showLogs && Math.random() < 0.1) { // Solo 10% de las veces para no saturar
-      console.log('📊 Pesos de premios (basados en cantidad):', availablePrizes.map((prize, i) => {
+    if (showLogs && Math.random() < 0.1) {
+      console.log('📊 Pesos de premios:', availablePrizes.map((prize, i) => {
         const prizeName = typeof prize === 'string' ? prize : prize.name;
         const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
+        const weight = prizeName === 'PeraWallet' ? 0.4 : 1;
         return {
           premio: prizeName,
           cantidad: prizeQuantity,
-          peso: prizeQuantity,
+          peso: weight,
           probabilidad: (probabilities[i] * 100).toFixed(2) + '%'
         };
       }));

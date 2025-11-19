@@ -3,15 +3,12 @@ import { useWheelAnimation } from '../hooks/useWheelAnimation';
 import WheelCanvas from './WheelCanvas';
 import FlickerPointer from './FlickerPointer';
 import WinnerPopup from './WinnerPopup';
-import ReferenceOverlay from './ReferenceOverlay';
-import ReferenceIMG from '../assets/img/layout2.jpg';
 import backgroundVideo from '../assets/background/Spin_Video_BG.mp4';
 import headerImg from '../assets/img/header.png';
 import buttonImg from '../assets/img/EXPORT EFECTOS/Boton.png';
 import { selectWeightedWinner } from '../utils/wheelCalculations';
 import './SpinWheelAlgoland.css';
 
-// Mapeo de nombres de premios a textos de ganador
 const PRIZE_WIN_TEXTS = {
   "Label": "You win a cool Tag",
   "Mug": "You win a power Mug",
@@ -26,7 +23,6 @@ const PRIZE_WIN_TEXTS = {
   "PeraWallet": "You win a Spin in Pera"
 };
 
-// Premios fijos para GitHub Pages (formato objeto para compatibilidad)
 const DEFAULT_PRIZES = [
   { name: "PeraWallet", quantity: 10, winText: "You win a Spin in Pera" },
   { name: "Tote", quantity: 10, winText: "You win a shiny Tote bag" },
@@ -42,38 +38,30 @@ const DEFAULT_PRIZES = [
 ];
 
 const SpinWheelAlgoland = () => {
-  const [wheelSize, setWheelSize] = useState(700); // tamaño base, se ajusta a viewport
+  const [wheelSize, setWheelSize] = useState(700);
   const [showWinner, setShowWinner] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [prizes, setPrizes] = useState(DEFAULT_PRIZES);
-  const [connectionStatus, setConnectionStatus] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [cursorVisible, setCursorVisible] = useState(true);
   const [decrementPaused, setDecrementPaused] = useState(false);
   const wsRef = useRef(null);
-  
-  // Normalizar premios (todos permanecen visibles, incluso con cantidad 0)
-  // El peso está vinculado a la cantidad, por lo que premios con cantidad 0 no pueden ser seleccionados
   const availablePrizes = useMemo(() => {
-    return prizes
-      .map(prize => {
-        // Normalizar a formato objeto
-        if (typeof prize === 'string') {
-          return { 
-            name: prize, 
-            quantity: 1, // En modo demo, asumir cantidad 1
-            winText: PRIZE_WIN_TEXTS[prize] || prize
-          };
-        }
-        const prizeName = prize.name || prize;
-        return {
-          name: prizeName,
-          quantity: typeof prize.quantity === 'number' ? prize.quantity : 0,
-          winText: prize.winText || PRIZE_WIN_TEXTS[prizeName] || prizeName
+    return prizes.map(prize => {
+      if (typeof prize === 'string') {
+        return { 
+          name: prize, 
+          quantity: 1,
+          winText: PRIZE_WIN_TEXTS[prize] || prize
         };
-      });
-      // Ya no filtramos premios con cantidad 0 - todos permanecen visibles
-      // Si cantidad = 0, el peso será 0 y no podrán ser seleccionados
+      }
+      const prizeName = prize.name || prize;
+      return {
+        name: prizeName,
+        quantity: typeof prize.quantity === 'number' ? prize.quantity : 0,
+        winText: prize.winText || PRIZE_WIN_TEXTS[prizeName] || prizeName
+      };
+    });
   }, [prizes]);
   
   const { angle, velocity, spinning, winner, startSpin } = useWheelAnimation(availablePrizes);
@@ -93,19 +81,14 @@ const SpinWheelAlgoland = () => {
 
   useEffect(() => {
     const handleGlobalClick = (e) => {
-      // Si el popup está visible, permitir que se cierre (el popup maneja su propio cierre)
-      // pero NO iniciar un nuevo spin
       if (showWinner) {
-        // El popup tiene su propio handler de cierre, solo necesitamos evitar iniciar un spin
         return;
       }
       
-      // No hacer nada si se hace click en el popup
       if (e.target.closest('.winner-popup-overlay')) {
         return;
       }
       
-      // Permitir girar solo si no está girando y hay premios disponibles
       if (!spinning && availablePrizes.length > 0) {
         startSpin();
       }
@@ -123,10 +106,8 @@ const SpinWheelAlgoland = () => {
     setIsDemoMode(isGitHubPages);
     
     if (isGitHubPages) {
-      setConnectionStatus('Modo Demo - Premios Fijos');
       setPrizes(DEFAULT_PRIZES);
     } else {
-      setConnectionStatus('Conectando al servidor...');
       connectToWebSocket();
     }
   }, []);
@@ -145,7 +126,6 @@ const SpinWheelAlgoland = () => {
         
         switch (data.type) {
           case 'prizes_update':
-            // Normalizar premios que vienen del servidor
             const normalizedPrizes = data.prizes.map(p => {
               if (typeof p === 'string') {
                 return { 
@@ -162,7 +142,6 @@ const SpinWheelAlgoland = () => {
               };
             });
             setPrizes(normalizedPrizes);
-            console.log('📦 Premios actualizados:', normalizedPrizes);
             break;
             
           case 'spin_wheel':
@@ -189,7 +168,6 @@ const SpinWheelAlgoland = () => {
     };
   };
   
-  // Listener para la tecla "r" para pausar/reanudar el decremento
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'r' || e.key === 'R') {
@@ -205,13 +183,11 @@ const SpinWheelAlgoland = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  // Decrementar cantidad cuando se gana un premio (solo si no está pausado)
   useEffect(() => {
     if (!winner || isDemoMode || decrementPaused) return;
     
     const winnerPrizeName = typeof winner.prize === 'string' ? winner.prize : winner.prize;
     
-    // Enviar mensaje al servidor para decrementar
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: 'decrement_prize',
@@ -219,7 +195,6 @@ const SpinWheelAlgoland = () => {
       }));
       console.log('📤 Decrementando premio:', winnerPrizeName);
     } else {
-      // En modo demo, decrementar localmente
       setPrizes(prevPrizes => {
         return prevPrizes.map(prize => {
           const prizeName = typeof prize === 'string' ? prize : prize.name;
@@ -239,8 +214,8 @@ const SpinWheelAlgoland = () => {
   useEffect(() => {
     const computeWheelSize = () => {
       const minSide = Math.min(window.innerWidth, window.innerHeight);
-      const target = Math.floor(minSide * 0.902); // 0.82 * 1.1 = 0.902 (10% más grande)
-      const clamped = Math.max(616, Math.min(target, 1056)); // 560*1.1=616, 960*1.1=1056
+      const target = Math.floor(minSide * 0.902);
+      const clamped = Math.max(616, Math.min(target, 1056));
       setWheelSize(clamped);
     };
     computeWheelSize();
@@ -270,12 +245,10 @@ const SpinWheelAlgoland = () => {
     }
   }, [winner]);
 
-  // Exponer función de simulación en window para uso desde consola
   useEffect(() => {
     const simulateSpins = (numSpins = 1000) => {
       const canSelectPeraWallet = () => true;
       
-      // Contador de resultados
       const counts = {};
       DEFAULT_PRIZES.forEach(prize => {
         const prizeName = typeof prize === 'string' ? prize : prize.name;
@@ -295,29 +268,38 @@ const SpinWheelAlgoland = () => {
       const endTime = performance.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
-      // Calcular probabilidades teóricas usando la cantidad como peso
-      const totalWeight = DEFAULT_PRIZES.reduce((sum, prize) => {
+      // Calcular peso total: todos peso 1, excepto PeraWallet que tiene 0.4
+      // Solo contar premios con cantidad > 0
+      const availablePrizesForSim = DEFAULT_PRIZES.filter(prize => {
         const prizeName = typeof prize === 'string' ? prize : prize.name;
         const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
-        // Si es PeraWallet y tiene cantidad 0, peso = 0
-        if (prizeName === 'PeraWallet' && prizeQuantity === 0) {
-          return sum;
-        }
-        return sum + prizeQuantity;
+        return prizeQuantity > 0;
+      });
+      
+      const totalWeight = availablePrizesForSim.reduce((sum, prize) => {
+        const prizeName = typeof prize === 'string' ? prize : prize.name;
+        return sum + (prizeName === 'PeraWallet' ? 0.4 : 1);
       }, 0);
       
-      // Mostrar resultados
       console.log(`\n✅ Simulación completada en ${duration}s\n`);
       console.log('📊 RESULTADOS DE LA SIMULACIÓN:');
       console.log('═'.repeat(90));
-      console.log(`${'Premio'.padEnd(20)} | ${'Cantidad'.padEnd(10)} | ${'Teórico %'.padEnd(12)} | ${'Teórico #'.padEnd(12)} | ${'Simulado #'.padEnd(12)} | ${'Real %'.padEnd(10)} | ${'Diferencia'.padEnd(12)}`);
+      console.log(`${'Premio'.padEnd(20)} | ${'Cantidad'.padEnd(10)} | ${'Peso'.padEnd(8)} | ${'Teórico %'.padEnd(12)} | ${'Teórico #'.padEnd(12)} | ${'Simulado #'.padEnd(12)} | ${'Real %'.padEnd(10)} | ${'Diferencia'.padEnd(12)}`);
       console.log('─'.repeat(90));
       
       DEFAULT_PRIZES.forEach(prize => {
         const prizeName = typeof prize === 'string' ? prize : prize.name;
         const prizeQuantity = typeof prize === 'string' ? 1 : (prize.quantity || 0);
-        // El peso es igual a la cantidad (0 si es PeraWallet con cantidad 0)
-        const weight = (prizeName === 'PeraWallet' && prizeQuantity === 0) ? 0 : prizeQuantity;
+        
+        // Solo calcular probabilidad si el premio tiene cantidad > 0
+        if (prizeQuantity === 0) {
+          console.log(
+            `${prizeName.padEnd(20)} | ${prizeQuantity.toString().padStart(8)} | ${'0.00'.padStart(6)} | ${'0.00'.padStart(6)}% | ${'0'.padStart(4)} | ${(counts[prizeName] || 0).toString().padStart(4)} | ${'0.00'.padStart(6)}% | ${'0'.padStart(4)} (0.00%)`
+          );
+          return;
+        }
+        
+        const weight = prizeName === 'PeraWallet' ? 0.4 : 1;
         const theoreticalProb = totalWeight > 0 ? weight / totalWeight : 0;
         const theoreticalCount = theoreticalProb * numSpins;
         const actualCount = counts[prizeName] || 0;
@@ -327,7 +309,7 @@ const SpinWheelAlgoland = () => {
         const diffPercent = theoreticalCount > 0 ? (difference / theoreticalCount * 100).toFixed(2) : '0.00';
         
         console.log(
-          `${prizeName.padEnd(20)} | ${prizeQuantity.toString().padStart(8)} | ${theoreticalPercent.padStart(6)}% | ${Math.round(theoreticalCount).toString().padStart(4)} | ${actualCount.toString().padStart(4)} | ${actualPercent.padStart(6)}% | ${difference >= 0 ? '+' : ''}${difference.toFixed(0).padStart(4)} (${diffPercent.padStart(6)}%)`
+          `${prizeName.padEnd(20)} | ${prizeQuantity.toString().padStart(8)} | ${weight.toFixed(2).padStart(6)} | ${theoreticalPercent.padStart(6)}% | ${Math.round(theoreticalCount).toString().padStart(4)} | ${actualCount.toString().padStart(4)} | ${actualPercent.padStart(6)}% | ${difference >= 0 ? '+' : ''}${difference.toFixed(0).padStart(4)} (${diffPercent.padStart(6)}%)`
         );
       });
       
@@ -361,12 +343,6 @@ const SpinWheelAlgoland = () => {
   const handleCloseWinner = useCallback(() => {
     setShowWinner(false);
   }, []);
-
-  const handleTouchStart = useCallback((e) => {
-    if (spinning) return;
-    e.preventDefault();
-    handleSpin();
-  }, [spinning, handleSpin]);
 
   return (
     <div
@@ -408,7 +384,7 @@ const SpinWheelAlgoland = () => {
 
         <div className={`wheel-container ${showWinner ? 'hidden' : ''}`}>
           <WheelCanvas
-            key={availablePrizes.length} // Forzar re-render cuando cambian los premios disponibles
+            key={availablePrizes.length}
             angle={angle}
             prizes={availablePrizes}
             winnerIndex={winner?.index}
@@ -443,9 +419,6 @@ const SpinWheelAlgoland = () => {
           autoCloseTime={isDemoMode ? 8000 : 15000}
         />
       </div>
-      
-      {/* Overlay de referencia - Presiona 'B' para activar/desactivar */}
-      <ReferenceOverlay imagePath={ReferenceIMG} />
     </div>
   );
 };
